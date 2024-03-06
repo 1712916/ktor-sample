@@ -5,7 +5,8 @@ import kotlinx.serialization.Serializable
 import java.util.Date
 import java.util.UUID
 
-//money: expense, income
+
+
 @Serializable
 data class Money(
     @Serializable(with = UUIDSerializer::class)

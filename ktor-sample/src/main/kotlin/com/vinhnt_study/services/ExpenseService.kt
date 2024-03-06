@@ -4,17 +4,6 @@ import com.vinhnt_study.data.models.Money
 import com.vinhnt_study.data.models.MoneyRequest
 import com.vinhnt_study.data.repositories.ExpenseRepository
 
-
-
-//create a data service interface
-interface DataService<T, R> {
-    fun findAll(): List<T>
-    fun findById(id: String): T?
-    fun add(item: R): T
-    fun update(t: T): T
-    fun delete(id: String): T
-}
-
 //create ExpenseService interface
 interface ExpenseService : DataService<Money, MoneyRequest>
 
