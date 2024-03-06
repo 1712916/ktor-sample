@@ -7,6 +7,7 @@ import com.vinhnt_study.data.models.ResponseData
 import com.vinhnt_study.services.ExpenseService
 import com.vinhnt_study.services.ExpenseServiceImpl
 import io.ktor.server.application.*
+import io.ktor.server.plugins.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -40,8 +41,8 @@ fun Route.expenseRoutes() {
     //add new expense
     post("api/expenses") {
         //get the expense from the request
+        val expense = call.parseRequest<MoneyRequest>()
 
-        val expense = call.receive<MoneyRequest>()
         //call the service to add the expense
         val newExpense = expenseService.add(expense)
 
@@ -53,8 +54,9 @@ fun Route.expenseRoutes() {
     //update expense
     put("api/expenses") {
         //get the id from the request
-        //get the expense from the request
-        val expense = call.receive<Money>()
+        //get the expense from the request and c
+
+        val expense = call.parseRequest <Money>()
         //call the service to update the expense
         val updatedExpense = expenseService.update(expense)
         //return the updated expense with a 200 OK status and json format
@@ -73,5 +75,14 @@ fun Route.expenseRoutes() {
         call.respond(
             ResponseData.success(deletedExpense)
         )
+    }
+}
+
+//create an utils to handle the parse request success and error
+suspend inline fun <reified T : Any> ApplicationCall.parseRequest(): T {
+    return try {
+      this.receive<T>()
+    } catch (e: Exception) {
+        throw InvalidBodyException("Can not parse the request")
     }
 }

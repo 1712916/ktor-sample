@@ -7,9 +7,7 @@ import kotlinx.serialization.Serializer
 //create a json response data class include data field is a Generic type, message and status field are String type
 @Serializable
 data class ResponseData<T>(
-    val data: T,
-    val message: String,
-    val status: Int
+    val data: T, val message: String, val status: Int
 ) {
     //create a companion object to create a default success response
     companion object {
@@ -20,5 +18,11 @@ data class ResponseData<T>(
         fun <T> created(data: T): ResponseData<T> {
             return ResponseData(data, "Created", 201)
         }
+
+        fun badRequest(message: String): ResponseData<Any?> {
+            return ResponseData(null, message, 400)
+        }
     }
 }
+
+//create error response when can not parse the request
