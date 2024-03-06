@@ -1,5 +1,6 @@
 package com.vinhnt_study.utils
 
+import com.vinhnt_study.data.models.MoneyType
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
@@ -20,18 +21,34 @@ object UUIDSerializer : KSerializer<UUID> {
     }
 }
 
+const val DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss"
 
 object DateSerializer : KSerializer<Date> {
     override val descriptor = PrimitiveSerialDescriptor("DATE", PrimitiveKind.STRING)
+
+
     override fun deserialize(decoder: Decoder): Date {
-        val formatter = SimpleDateFormat()
+        val formatter = SimpleDateFormat(DATE_TIME_FORMAT)
         val date = formatter.parse(decoder.decodeString())
         return date
 
     }
 
     override fun serialize(encoder: Encoder, value: Date) {
-        val formatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+        val formatter = SimpleDateFormat(DATE_TIME_FORMAT)
         encoder.encodeString(formatter.format(value))
+    }
+}
+
+object MoneyTypeSerializer : KSerializer<MoneyType> {
+    override val descriptor = PrimitiveSerialDescriptor("MoneyType", PrimitiveKind.STRING)
+    override fun deserialize(decoder: Decoder): MoneyType {
+        return MoneyType.entries[decoder.decodeInt()]
+
+    }
+
+    override fun serialize(encoder: Encoder, value: MoneyType) {
+
+        encoder.encodeInt(value.ordinal)
     }
 }

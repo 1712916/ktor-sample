@@ -9,12 +9,16 @@ import kotlinx.serialization.Serializer
 data class ResponseData<T>(
     val data: T,
     val message: String,
-    val status: String
+    val status: Int
 ) {
     //create a companion object to create a default success response
     companion object {
         fun <T> success(data: T): ResponseData<T> {
-            return ResponseData(data, "Success", "200")
+            return ResponseData(data, "Success", 200)
+        }
+
+        fun <T> created(data: T): ResponseData<T> {
+            return ResponseData(data, "Created", 201)
         }
     }
 }

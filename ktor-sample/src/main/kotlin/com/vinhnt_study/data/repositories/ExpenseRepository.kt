@@ -1,8 +1,12 @@
 package com.vinhnt_study.data.repositories
 
+import com.vinhnt_study.data.mockExpenseCategories
+import com.vinhnt_study.data.mockExpenses
+import com.vinhnt_study.data.mockMoneySources
 import com.vinhnt_study.data.models.*
 import io.ktor.server.plugins.*
 import java.util.*
+
 
 
 class ExpenseRepository : DataRepository<Money, MoneyRequest>() {
@@ -10,48 +14,7 @@ class ExpenseRepository : DataRepository<Money, MoneyRequest>() {
     private val expenses = mutableListOf<Money>()
 
     init {
-        //generate some dummy data for expenses
-        expenses.add(
-            Money(
-                UUID.randomUUID(),
-                35000.0,
-                MoneyType.Expense,
-                ExpenseCategory(UUID.randomUUID(), "Food"),
-                "Lunch",
-                MoneySource(id = UUID.randomUUID(), name = "Cash"),
-                Date(),
-                Date(),
-                Date()
-            ),
-        )
-
-        expenses.add(
-            Money(
-                UUID.randomUUID(),
-                100000.0,
-                MoneyType.Expense,
-                ExpenseCategory(UUID.randomUUID(), "Drink"),
-                "Coffee",
-                MoneySource(id = UUID.randomUUID(), name = "Cash"),
-                Date(),
-                Date(),
-                Date()
-            ),
-        )
-
-        expenses.add(
-            Money(
-                UUID.randomUUID(),
-                50000.0,
-                MoneyType.Expense,
-                ExpenseCategory(UUID.randomUUID(), "Drink"),
-                "Milk Tea",
-                MoneySource(id = UUID.randomUUID(), name = "Cash"),
-                Date(),
-                Date(),
-                Date()
-            ),
-        )
+        expenses.addAll(mockExpenses)
     }
 
     override fun findAll(): List<Money> {
@@ -87,9 +50,9 @@ class ExpenseRepository : DataRepository<Money, MoneyRequest>() {
             UUID.randomUUID(),
             t.amount,
             MoneyType.entries[t.type],
-            ExpenseCategory(UUID.fromString(t.categoryId), "Food"),
+            mockExpenseCategories.firstOrNull { it.id == UUID.fromString(t.categoryId) } ?: throw NotFoundException("Can not find category with id ${t.categoryId}"),
             t.description,
-            MoneySource(UUID.fromString(t.sourceId), "Cash"),
+            mockMoneySources.firstOrNull { it.id == UUID.fromString(t.sourceId) } ?: throw NotFoundException("Can not find source with id ${t.sourceId}"),
             t.date,
             Date(),
             Date()

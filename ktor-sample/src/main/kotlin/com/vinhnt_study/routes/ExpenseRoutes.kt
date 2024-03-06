@@ -2,6 +2,7 @@ package com.vinhnt_study.routes
 
 import com.vinhnt_study.data.models.Money
 import com.vinhnt_study.data.models.MoneyRequest
+import com.vinhnt_study.data.models.MoneyType
 import com.vinhnt_study.data.models.ResponseData
 import com.vinhnt_study.services.ExpenseService
 import com.vinhnt_study.services.ExpenseServiceImpl
@@ -39,11 +40,13 @@ fun Route.expenseRoutes() {
     //add new expense
     post("api/expenses") {
         //get the expense from the request
+
         val expense = call.receive<MoneyRequest>()
         //call the service to add the expense
         val newExpense = expenseService.add(expense)
+
          call.respond(
-            ResponseData.success(newExpense)
+            ResponseData.created(newExpense)
         )
     }
 

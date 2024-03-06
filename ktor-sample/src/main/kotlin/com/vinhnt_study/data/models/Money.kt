@@ -11,6 +11,7 @@ data class Money(
     @Serializable(with = UUIDSerializer::class)
     val id: UUID,
     val amount: Double,
+    @Serializable(with = MoneyTypeSerializer::class)
     val type: MoneyType,
     val category: Category,
     val description: String,
@@ -60,3 +61,4 @@ data class MoneySource(
     val id: UUID,
     val name: String,
 )
+
