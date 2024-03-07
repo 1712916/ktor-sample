@@ -2,6 +2,8 @@ package com.vinhnt_study.plugins
 
 import kotlinx.coroutines.*
 import kotlinx.serialization.Serializable
+import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.transactions.transaction
 import java.sql.Connection
 import java.sql.Statement
 
