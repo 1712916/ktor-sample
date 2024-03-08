@@ -1,10 +1,13 @@
 package com.vinhnt_study.services
 
+ import com.auth0.jwt.JWT
+ import com.auth0.jwt.algorithms.Algorithm
  import com.vinhnt_study.data.models.authentication.LoginResponse
  import com.vinhnt_study.data.models.authentication.RegisterRequest
 import com.vinhnt_study.data.repositories.AccountRepository
 import com.vinhnt_study.data.repositories.AccountRepositoryImpl
  import org.mindrot.jbcrypt.BCrypt
+ import java.util.*
 
 interface AuthenticationService {
     suspend fun loginByAccount(account: String, password: String) : LoginResponse
@@ -30,7 +33,13 @@ class  AuthenticationServiceImpl : AuthenticationService  {
             throw IllegalArgumentException("Password is incorrect")
         }
 
-        return LoginResponse("token")
+        val token = JWT.create()
+            .withClaim("account", account.account)
+            .withClaim("email", account.email)
+            .withExpiresAt(Date(System.currentTimeMillis() + 60000))
+            .sign(Algorithm.HMAC256("app-secret"))
+
+        return LoginResponse(token)
     }
 
     override suspend fun loginByEmail(email: String, password: String) : LoginResponse {

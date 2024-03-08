@@ -1,9 +1,13 @@
 package com.vinhnt_study
 
+import com.auth0.jwt.JWT
+import com.auth0.jwt.algorithms.Algorithm
 import com.vinhnt_study.db.DatabaseSingleton
 import com.vinhnt_study.plugins.*
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.statuspages.*
@@ -18,7 +22,20 @@ fun main() {
 
 fun Application.module() {
     DatabaseSingleton.init()
-    configureSecurity()
+    install(Authentication) {
+        jwt("auth-jwt") {
+            realm = ""
+            verifier(
+                JWT
+                    .require(Algorithm.HMAC256("app-secret"))
+                    .build())
+
+            validate {
+                    jwtCredential ->
+                JWTPrincipal(jwtCredential.payload)
+            }
+        }
+    }
     configureSerialization()
     configureRouting()
     install(StatusPages) {
@@ -26,4 +43,5 @@ fun Application.module() {
             call.respond(HttpStatusCode.BadRequest, cause.message ?: "Internal Server Error")
         }
     }
+
 }

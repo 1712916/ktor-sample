@@ -32,6 +32,7 @@ dependencies {
     implementation("io.ktor:ktor-server-auth-jvm")
     implementation("io.ktor:ktor-server-auth-jwt-jvm")
     implementation("io.ktor:ktor-server-auth:$ktor_version")
+    implementation("io.ktor:ktor-server-auth-jwt:$ktor_version")
     implementation("io.ktor:ktor-client-core-jvm")
     implementation("io.ktor:ktor-client-apache-jvm")
     implementation("io.ktor:ktor-server-status-pages:$ktor_version")
