@@ -10,23 +10,23 @@ interface ExpenseService : DataService<Money, MoneyRequest>
 //create ExpenseServiceImpl class
 class ExpenseServiceImpl  : ExpenseService  {
     private val repository = ExpenseRepository  ()
-    override fun findAll(): List<Money> {
+    override suspend fun findAll(): List<Money> {
         return  repository.findAll()
     }
 
-    override fun findById(id: String): Money? {
+    override suspend fun findById(id: String): Money? {
         return repository.findById(id)
      }
 
-    override fun add(item: MoneyRequest): Money {
+    override suspend fun add(item: MoneyRequest): Money {
         return repository.add(item)
     }
 
-    override fun update(t: Money): Money {
+    override suspend fun update(t: Money): Money {
         return repository.update(t)
     }
 
-    override fun delete(id: String): Money {
+    override suspend fun delete(id: String): Money {
         return repository.delete(id)
     }
 

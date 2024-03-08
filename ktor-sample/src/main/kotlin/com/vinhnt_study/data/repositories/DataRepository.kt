@@ -1,9 +1,9 @@
 package com.vinhnt_study.data.repositories
 
-abstract  class DataRepository<T, R> {
-    abstract  fun findAll(): List<T>
-    abstract  fun findById(id: String): T?
-    abstract  fun add(t: R): T
-    abstract  fun update(t: T): T
-    abstract  fun delete(id: String): T
+interface DataRepository<T, R> {
+    suspend fun findAll(): List<T>
+    suspend fun findById(id: String): T?
+    suspend fun add(t: R): T
+    suspend fun update(t: T): T
+    suspend fun delete(id: String): T
 }

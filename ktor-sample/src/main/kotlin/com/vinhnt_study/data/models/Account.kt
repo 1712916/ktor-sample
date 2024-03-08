@@ -1,6 +1,7 @@
 package com.vinhnt_study.data.models
 
 import com.vinhnt_study.db.DatabaseSingleton.dbQuery
+import com.vinhnt_study.utils.LocaleDateTimeSerializer
 import com.vinhnt_study.utils.UUIDSerializer
 import kotlinx.serialization.Serializable
 import java.util.Date
@@ -10,15 +11,20 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.javatime.date
 import org.jetbrains.exposed.sql.javatime.datetime
 import java.time.LocalDate
+import java.time.LocalDateTime
 
+@Serializable
 class Account(
-    @Serializable(with = UUIDSerializer::class) val id: UUID,
+    @Serializable(with = UUIDSerializer::class)
+    val id: UUID,
     val account: String,
     val password: String,
     val email: String,
-    createDate: LocalDate,
-    updateDate: LocalDate,
-) : CreateDate(createDate, updateDate)
+    @Serializable(with = LocaleDateTimeSerializer::class)
+    val createDate: LocalDateTime,
+    @Serializable(with = LocaleDateTimeSerializer::class)
+    val updateDate: LocalDateTime,
+)
 
 
 object Accounts : Table() {
@@ -26,19 +32,29 @@ object Accounts : Table() {
     val account = varchar("account", 128)
     val password = varchar("password", 128)
     val email = varchar("email", 128)
-    val createDate = date("create_date")
-    val updateDate = date("update_date")
+    val createDate = datetime("create_date")
+    val updateDate = datetime("update_date")
 
     override val primaryKey = PrimaryKey(id)
 }
 
+
+
+
 //create interface account DAO
-interface AccountDAO {
+interface CRUDAccountDAO {
     suspend fun create(account: Account): Account
     suspend fun read(id: UUID): Account?
     suspend fun update(account: Account): Account
     suspend fun delete(id: UUID): Boolean
 }
+
+interface SearchAccountDAO {
+    suspend fun findByEmail(email: String): Account?
+    suspend fun findByAccount(account: String): Account?
+}
+
+interface AccountDAO : CRUDAccountDAO, SearchAccountDAO
 
 //create class account DAO implementation
 class AccountDAOImpl : AccountDAO {
@@ -74,7 +90,7 @@ class AccountDAOImpl : AccountDAO {
         val updateStatement = Accounts.update({ Accounts.id eq account.id }) {
             it[Accounts.password] = account.password
             it[Accounts.email] = account.email
-            it[Accounts.updateDate] = LocalDate.now()
+            it[Accounts.updateDate] = LocalDateTime.now()
         } > 0
         read(account.id) ?: throw IllegalStateException("Account not found")
     }
@@ -82,5 +98,21 @@ class AccountDAOImpl : AccountDAO {
     override suspend fun delete(id: UUID): Boolean  = dbQuery {
        //delete account by id
       Accounts.deleteWhere { Accounts.id eq id } > 0
+    }
+
+    //find account by email
+    override suspend fun findByEmail(email: String): Account? = dbQuery {
+        Accounts
+            .select { Accounts.email eq email }
+            .map(::resultRowToAccount)
+            .singleOrNull()
+    }
+
+    //find account by account
+    override suspend fun findByAccount(account: String): Account? = dbQuery {
+        Accounts
+            .select { Accounts.account eq account }
+            .map(::resultRowToAccount)
+            .singleOrNull()
     }
 }

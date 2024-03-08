@@ -6,6 +6,7 @@ import com.vinhnt_study.data.models.MoneyType
 import com.vinhnt_study.data.models.ResponseData
 import com.vinhnt_study.services.ExpenseService
 import com.vinhnt_study.services.ExpenseServiceImpl
+import com.vinhnt_study.utils.parseRequest
 import io.ktor.server.application.*
 import io.ktor.server.plugins.*
 import io.ktor.server.request.*
@@ -78,11 +79,3 @@ fun Route.expenseRoutes() {
     }
 }
 
-//create an utils to handle the parse request success and error
-suspend inline fun <reified T : Any> ApplicationCall.parseRequest(): T {
-    return try {
-      this.receive<T>()
-    } catch (e: Exception) {
-        throw InvalidBodyException("Can not parse the request")
-    }
-}

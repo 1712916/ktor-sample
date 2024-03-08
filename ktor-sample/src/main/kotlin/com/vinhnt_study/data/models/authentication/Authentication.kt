@@ -4,9 +4,13 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 open class LoginRequest(
-    val account: String, val password: String
+    val account: String,
+    val password: String
 )
 
+@Serializable
 class RegisterRequest(
-    val email: String, account: String, password: String,
-) : LoginRequest(account = account, password = password)
+    val email: String,
+    val account: String,
+    val password: String
+)

@@ -1,31 +1,68 @@
 package com.vinhnt_study.services
 
-import com.vinhnt_study.data.models.Account
-import com.vinhnt_study.data.models.authentication.LoginRequest
-import com.vinhnt_study.data.repositories.AuthenticationRepository
+import com.vinhnt_study.data.models.authentication.RegisterRequest
+import com.vinhnt_study.data.repositories.AccountRepository
+import com.vinhnt_study.data.repositories.AccountRepositoryImpl
 
-interface AuthenticationService : DataService<Account, LoginRequest>{
+interface AuthenticationService {
+    suspend fun loginByAccount(account: String, password: String)
+
+    suspend fun loginByEmail(email: String, password: String)
+
+    suspend fun register(account: String, email: String, password: String)
+
+    suspend fun changePassword(account: String, oldPassword: String, newPassword: String)
+
+    suspend fun resetPassword(email: String, newPassword: String)
+
+    suspend fun logout()
 }
 
-class AuthenticationServiceImpl : AuthenticationService {
-    private val repository = AuthenticationRepository()
-    override fun findAll(): List<Account> {
-        return repository.findAll()
+class  AuthenticationServiceImpl : AuthenticationService  {
+    private val repository : AccountRepository =  AccountRepositoryImpl()
+
+    override suspend fun loginByAccount(account: String, password: String) {
+        repository.findByAccount(account)?.let {
+            if (it.password == password) {
+                TODO("USE BCRYPT TO COMPARE PASSWORDS")
+            }
+        }
+
+        throw IllegalArgumentException("Account not found")
     }
 
-    override fun findById(id: String): Account? {
-        return repository.findById(id)
+    override suspend fun loginByEmail(email: String, password: String) {
+        TODO("Not yet implemented")
     }
 
-    override fun add(item: LoginRequest): Account {
-        return repository.add(item)
+    override suspend fun register(account: String, email: String, password: String) {
+        repository.findByAccount(account)?.let {
+            throw IllegalArgumentException("Account already exists")
+        }
+
+        repository.findByEmail(email)?.let {
+            throw IllegalArgumentException("Email already exists")
+        }
+
+        repository.add(
+            RegisterRequest(
+                account,
+                password,
+                email
+            )
+        )
     }
 
-    override fun update(t: Account): Account {
-        return repository.update(t)
+    override suspend fun changePassword(account: String, oldPassword: String, newPassword: String) {
+        TODO("Not yet implemented")
     }
 
-    override fun delete(id: String): Account {
-        return repository.delete(id)
+    override suspend fun resetPassword(email: String, newPassword: String) {
+        TODO("Not yet implemented")
     }
+
+    override suspend fun logout() {
+        TODO("Not yet implemented")
+    }
+
 }

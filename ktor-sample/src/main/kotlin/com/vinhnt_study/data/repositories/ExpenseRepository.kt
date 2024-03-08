@@ -7,7 +7,7 @@ import com.vinhnt_study.data.models.*
 import io.ktor.server.plugins.*
 import java.util.*
 
-class ExpenseRepository : DataRepository<Money, MoneyRequest>() {
+class ExpenseRepository : DataRepository<Money, MoneyRequest> {
 
     private val expenses = mutableListOf<Money>()
 
@@ -15,15 +15,15 @@ class ExpenseRepository : DataRepository<Money, MoneyRequest>() {
         expenses.addAll(mockExpenses)
     }
 
-    override fun findAll(): List<Money> {
+    override suspend fun findAll(): List<Money> {
         return expenses
     }
 
-    override fun findById(id: String): Money? {
+    override suspend fun findById(id: String): Money? {
         return expenses.firstOrNull { it.id == UUID.fromString(id) }
     }
 
-    override fun delete(id: String): Money {
+    override suspend fun delete(id: String): Money {
         val money = findById(id) ?: throw NotFoundException("Can not find money with id $id")
 
         expenses.remove(money)
@@ -32,7 +32,7 @@ class ExpenseRepository : DataRepository<Money, MoneyRequest>() {
     }
 
 
-    override fun update(t: Money): Money {
+    override suspend fun update(t: Money): Money {
         //update money
         val index = expenses.indexOfFirst { it.id == t.id }
         if (index < 0) {
@@ -42,7 +42,7 @@ class ExpenseRepository : DataRepository<Money, MoneyRequest>() {
         return expenses[index]
     }
 
-    override fun add(t: MoneyRequest): Money {
+    override suspend fun add(t: MoneyRequest): Money {
         //create money from money request
         val money = Money(
             UUID.randomUUID(),
