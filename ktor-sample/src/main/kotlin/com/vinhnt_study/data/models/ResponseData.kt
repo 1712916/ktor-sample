@@ -19,8 +19,8 @@ data class ResponseData<T>(
             return ResponseData(data, "Created", 201)
         }
 
-        fun badRequest(message: String): ResponseData<Any?> {
-            return ResponseData(null, message, 400)
+        fun <T> badRequest(message: String, data: T): ResponseData<T> {
+            return ResponseData(data, message, 400)
         }
     }
 }

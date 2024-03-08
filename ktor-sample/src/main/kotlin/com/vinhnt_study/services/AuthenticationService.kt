@@ -1,13 +1,15 @@
 package com.vinhnt_study.services
 
-import com.vinhnt_study.data.models.authentication.RegisterRequest
+ import com.vinhnt_study.data.models.authentication.LoginResponse
+ import com.vinhnt_study.data.models.authentication.RegisterRequest
 import com.vinhnt_study.data.repositories.AccountRepository
 import com.vinhnt_study.data.repositories.AccountRepositoryImpl
+ import org.mindrot.jbcrypt.BCrypt
 
 interface AuthenticationService {
-    suspend fun loginByAccount(account: String, password: String)
+    suspend fun loginByAccount(account: String, password: String) : LoginResponse
 
-    suspend fun loginByEmail(email: String, password: String)
+    suspend fun loginByEmail(email: String, password: String) : LoginResponse
 
     suspend fun register(account: String, email: String, password: String)
 
@@ -21,18 +23,18 @@ interface AuthenticationService {
 class  AuthenticationServiceImpl : AuthenticationService  {
     private val repository : AccountRepository =  AccountRepositoryImpl()
 
-    override suspend fun loginByAccount(account: String, password: String) {
-        repository.findByAccount(account)?.let {
-            if (it.password == password) {
-                TODO("USE BCRYPT TO COMPARE PASSWORDS")
-            }
+    override suspend fun loginByAccount(account: String, password: String) : LoginResponse {
+        val account = repository.findByAccount(account) ?: throw IllegalArgumentException("Account not found")
+
+        if (!BCrypt.checkpw(password, account.password)) {
+            throw IllegalArgumentException("Password is incorrect")
         }
 
-        throw IllegalArgumentException("Account not found")
+        return LoginResponse("token")
     }
 
-    override suspend fun loginByEmail(email: String, password: String) {
-        TODO("Not yet implemented")
+    override suspend fun loginByEmail(email: String, password: String) : LoginResponse {
+        return LoginResponse("token")
     }
 
     override suspend fun register(account: String, email: String, password: String) {
@@ -46,9 +48,9 @@ class  AuthenticationServiceImpl : AuthenticationService  {
 
         repository.add(
             RegisterRequest(
-                account,
-                password,
-                email
+                email = email,
+                account = account,
+                password = BCrypt.hashpw(password, BCrypt.gensalt()),
             )
         )
     }

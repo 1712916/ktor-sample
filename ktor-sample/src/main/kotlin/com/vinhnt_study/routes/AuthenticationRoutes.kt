@@ -19,8 +19,12 @@ fun Route.authenticationRoutes() {
     val authenticationService: AuthenticationService = AuthenticationServiceImpl()
     post("api/login") {
         val loginRequest = call.parseRequest<LoginRequest>()
+        try {
+            call.respond(ResponseData.success(authenticationService.loginByAccount(loginRequest.account, loginRequest.password)))
 
-        authenticationService.loginByAccount(loginRequest.account, loginRequest.password)
+         } catch (e: IllegalArgumentException) {
+            call.respond(HttpStatusCode.BadRequest, ResponseData.badRequest(e.message!!, null))
+        }
     }
 
     //logout route
