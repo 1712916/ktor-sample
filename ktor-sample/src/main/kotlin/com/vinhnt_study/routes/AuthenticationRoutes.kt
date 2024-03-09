@@ -1,8 +1,8 @@
 package com.vinhnt_study.routes
 
-import com.vinhnt_study.data.models.ResponseData
-import com.vinhnt_study.data.models.authentication.LoginRequest
-import com.vinhnt_study.data.models.authentication.RegisterRequest
+import com.vinhnt_study.models.ResponseData
+import com.vinhnt_study.models.authentication.LoginRequest
+import com.vinhnt_study.models.authentication.RegisterRequest
 import com.vinhnt_study.services.AccountService
 import com.vinhnt_study.services.AccountServiceImpl
 import com.vinhnt_study.services.AuthenticationService

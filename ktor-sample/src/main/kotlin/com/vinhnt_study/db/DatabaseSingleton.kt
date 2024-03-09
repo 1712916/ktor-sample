@@ -1,6 +1,5 @@
 package com.vinhnt_study.db
 
-import com.vinhnt_study.data.models.Accounts
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
@@ -23,6 +22,7 @@ object DatabaseSingleton {
 
         transaction(database) {
             SchemaUtils.create(Accounts)
+            SchemaUtils.create(MoneySources, Categories, Moneys)
         }
     }
 

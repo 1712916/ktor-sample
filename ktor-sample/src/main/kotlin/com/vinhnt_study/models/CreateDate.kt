@@ -1,4 +1,4 @@
-package com.vinhnt_study.data.models
+package com.vinhnt_study.models
 
 import com.vinhnt_study.utils.LocaleDateTimeSerializer
 import kotlinx.serialization.Serializable

@@ -2,10 +2,10 @@ package com.vinhnt_study.services
 
  import com.auth0.jwt.JWT
  import com.auth0.jwt.algorithms.Algorithm
- import com.vinhnt_study.data.models.authentication.LoginResponse
- import com.vinhnt_study.data.models.authentication.RegisterRequest
-import com.vinhnt_study.data.repositories.AccountRepository
-import com.vinhnt_study.data.repositories.AccountRepositoryImpl
+ import com.vinhnt_study.models.authentication.LoginResponse
+ import com.vinhnt_study.models.authentication.RegisterRequest
+import com.vinhnt_study.repositories.AccountRepository
+import com.vinhnt_study.repositories.AccountRepositoryImpl
  import org.mindrot.jbcrypt.BCrypt
  import java.util.*
 
@@ -34,9 +34,10 @@ class  AuthenticationServiceImpl : AuthenticationService  {
         }
 
         val token = JWT.create()
+            .withClaim("account_id", account.id.toString())
             .withClaim("account", account.account)
             .withClaim("email", account.email)
-            .withExpiresAt(Date(System.currentTimeMillis() + 60000))
+            .withExpiresAt(Date(System.currentTimeMillis() + 6000000))
             .sign(Algorithm.HMAC256("app-secret"))
 
         return LoginResponse(token)

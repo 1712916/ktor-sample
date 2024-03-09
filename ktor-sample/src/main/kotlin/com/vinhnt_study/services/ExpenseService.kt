@@ -1,8 +1,8 @@
 package com.vinhnt_study.services
 
-import com.vinhnt_study.data.models.Money
-import com.vinhnt_study.data.models.MoneyRequest
-import com.vinhnt_study.data.repositories.ExpenseRepository
+import com.vinhnt_study.models.Money
+import com.vinhnt_study.models.MoneyRequest
+import com.vinhnt_study.repositories.ExpenseRepository
 
 //create ExpenseService interface
 interface ExpenseService : DataService<Money, MoneyRequest>

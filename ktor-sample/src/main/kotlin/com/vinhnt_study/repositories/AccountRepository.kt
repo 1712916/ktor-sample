@@ -1,7 +1,9 @@
-package com.vinhnt_study.data.repositories
+package com.vinhnt_study.repositories
 
-import com.vinhnt_study.data.models.*
-import com.vinhnt_study.data.models.authentication.RegisterRequest
+import com.vinhnt_study.models.authentication.RegisterRequest
+import com.vinhnt_study.db.AccountDAO
+import com.vinhnt_study.db.AccountDAOImpl
+import com.vinhnt_study.models.Account
 import java.time.LocalDateTime
 import java.util.*
 
@@ -12,7 +14,7 @@ interface AccountRepository : DataRepository<Account, RegisterRequest> {
     suspend fun findByEmail(email: String): Account?
 }
 
-class AccountRepositoryImpl :AccountRepository {
+class AccountRepositoryImpl : AccountRepository {
     private val dao: AccountDAO = AccountDAOImpl()
     //find account by account
     override suspend fun findByAccount(account: String): Account? {

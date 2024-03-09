@@ -1,6 +1,6 @@
 package com.vinhnt_study.utils
 
-import com.vinhnt_study.data.models.MoneyType
+import com.vinhnt_study.models.MoneyType
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor

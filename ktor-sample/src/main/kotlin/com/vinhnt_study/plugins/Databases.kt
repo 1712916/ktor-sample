@@ -1,6 +1,5 @@
 package com.vinhnt_study.plugins
 
-import com.vinhnt_study.data.models.Accounts
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*

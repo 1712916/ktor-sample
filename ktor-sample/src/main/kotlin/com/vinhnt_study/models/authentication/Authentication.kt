@@ -1,4 +1,4 @@
-package com.vinhnt_study.data.models.authentication
+package com.vinhnt_study.models.authentication
 
 import kotlinx.serialization.Serializable
 

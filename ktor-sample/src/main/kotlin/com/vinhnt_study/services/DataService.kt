@@ -9,3 +9,13 @@ interface DataService<T, R> {
     suspend fun update(t: T): T
     suspend fun delete(id: String): T
 }
+
+
+//create a data service interface for account id
+interface AuthDataService<T, R> {
+    suspend fun findAll(accountId: String): List<T>
+    suspend fun findById(id: String, accountId: String): T?
+    suspend fun add(item: R, accountId: String): T
+    suspend fun update(t: T, accountId: String): T
+    suspend fun delete(id: String, accountId: String): T
+}

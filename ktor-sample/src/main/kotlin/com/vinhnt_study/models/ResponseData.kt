@@ -1,4 +1,4 @@
-package com.vinhnt_study.data.models
+package com.vinhnt_study.models
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Serializer
