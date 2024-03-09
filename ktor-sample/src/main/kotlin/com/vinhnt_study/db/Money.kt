@@ -97,7 +97,10 @@ class MoneySourceDAOImpl : CRUDMoneySourceDAO {
         }
 
         if (updatedRows > 0) {
-            val updatedMoneySource = read(item.data.id) ?: throw IllegalStateException("Money source not found")
+            val updatedMoneySource = MoneySources
+                .select { MoneySources.id eq moneySourceId }
+                .map { resultRowToMoneySource(it) }
+                .singleOrNull() ?: throw IllegalStateException("Money source not found")
             updatedMoneySource
         } else {
             throw IllegalStateException("Money source not found")
