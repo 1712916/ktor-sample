@@ -1,6 +1,7 @@
 package com.vinhnt_study.plugins
 
 import com.vinhnt_study.routes.authenticationRoutes
+import com.vinhnt_study.routes.categoryRoutes
 import com.vinhnt_study.routes.expenseRoutes
 import com.vinhnt_study.routes.moneySourceRoutes
 import io.ktor.server.application.*
@@ -19,5 +20,6 @@ fun Application.configureRouting() {
         authenticationRoutes()
         expenseRoutes()
         moneySourceRoutes()
+        categoryRoutes()
     }
 }
