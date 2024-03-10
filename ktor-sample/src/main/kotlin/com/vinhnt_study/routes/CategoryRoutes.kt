@@ -43,5 +43,12 @@ fun Route.categoryRoutes() {
             val categoryRequest = call.receive<Category>()
             call.respond(ResponseData.success(categoryService.update(categoryRequest, getAccountId(call))))
         }
+
+        //delete category
+        delete("api/categories/{id}") {
+            //get id parameter
+            val id = call.parameters["id"] ?: ""
+            call.respond(ResponseData.success(categoryService.delete(id, getAccountId(call))))
+        }
     }
 }
