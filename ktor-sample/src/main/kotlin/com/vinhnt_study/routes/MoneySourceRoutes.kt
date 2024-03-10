@@ -49,7 +49,7 @@ fun Route.moneySourceRoutes() {
             //get money source name
             val moneySourceRequest = call.receive<MoneySourceRequest>()
             println("money source name: ${moneySourceRequest.name}")
-            call.respond(ResponseData.success(moneySourceService.add(moneySourceRequest.name, accountId)))
+            call.respond(ResponseData.success(moneySourceService.add(MoneySource(name = moneySourceRequest.name), accountId)))
         }
 
         //update money source

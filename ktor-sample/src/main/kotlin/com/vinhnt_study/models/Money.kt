@@ -2,6 +2,7 @@ package com.vinhnt_study.models
 
 import com.vinhnt_study.utils.*
 import kotlinx.serialization.Serializable
+import java.time.LocalDateTime
 import java.util.Date
 import java.util.UUID
 
@@ -9,20 +10,19 @@ import java.util.UUID
 
 @Serializable
 data class Money(
-    @Serializable(with = UUIDSerializer::class)
-    val id: UUID,
+     val id: String? = null,
     val amount: Double,
     @Serializable(with = MoneyTypeSerializer::class)
     val type: MoneyType,
     val category: Category,
     val description: String,
     val source: MoneySource,
-    @Serializable(with = DateSerializer::class)
-    val date: Date,
-    @Serializable(with = DateSerializer::class)
-    val createTime: Date,
-    @Serializable(with = DateSerializer::class)
-    val updateTime: Date,
+    @Serializable(with = LocaleDateTimeSerializer::class)
+    val date: LocalDateTime? = null,
+     @Serializable(with = LocaleDateTimeSerializer::class)
+    val createTime: LocalDateTime? = null,
+     @Serializable(with = LocaleDateTimeSerializer::class)
+    val updateTime:  LocalDateTime? = null,
 ) {
     //update current money with new money data
     fun update(newMoney: Money): Money {
@@ -35,7 +35,6 @@ data class Money(
             source = newMoney.source,
             date = newMoney.date,
             createTime = this.createTime,
-            updateTime = Date()
         )
     }
 }
@@ -58,8 +57,7 @@ enum class MoneyType {
 //storage money from: cash, bank, credit card, ...
 @Serializable
 data class MoneySource(
-    @Serializable(with = UUIDSerializer::class)
-    val id: UUID,
+     val id: String? = null,
     val name: String,
 )
 

@@ -1,20 +1,18 @@
 package com.vinhnt_study.repositories
 
-import java.util.UUID
-
-interface DataRepository<T, R> {
+interface DataRepository<T, ID> {
     suspend fun findAll(): List<T>
-    suspend fun findById(id: String): T?
-    suspend fun add(t: R): T
+    suspend fun findById(id: ID): T?
+    suspend fun add(item: T): T
     suspend fun update(t: T): T
-    suspend fun delete(id: String): T
+    suspend fun delete(id: ID): Boolean
 }
 
 //use for storage data need account id
-interface AuthDataRepository <T, R> {
-    suspend fun findAll(accountId: UUID): List<T>
-    suspend fun findById(id: String, accountId: UUID): T?
-    suspend fun add(t: R, accountId: UUID): T
-    suspend fun update(t: T, accountId: UUID): T
-    suspend fun delete(id: String, accountId: UUID): T
+interface AuthDataRepository <T, ID> {
+    suspend fun findAll(accountId: String): List<T>
+    suspend fun findById(id: ID, accountId: String): T?
+    suspend fun add(item: T, accountId: String): T
+    suspend fun update(item: T, accountId: String): T
+    suspend fun delete(id: ID, accountId: String): Boolean
 }

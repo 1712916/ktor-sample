@@ -5,12 +5,11 @@ import com.vinhnt_study.models.authentication.RegisterRequest
 import com.vinhnt_study.repositories.AccountRepository
 import com.vinhnt_study.repositories.AccountRepositoryImpl
 
-interface AccountService : DataService<Account, RegisterRequest>{
-}
+interface AccountService : DataService<Account, RegisterRequest>
 
 class AccountServiceImpl : AccountService {
-    private val repository : AccountRepository =  AccountRepositoryImpl()
-    override suspend  fun findAll(): List<Account> {
+    private val repository: AccountRepository = AccountRepositoryImpl()
+    override suspend fun findAll(): List<Account> {
         return repository.findAll()
     }
 
@@ -19,14 +18,15 @@ class AccountServiceImpl : AccountService {
     }
 
     override suspend fun add(item: RegisterRequest): Account {
-        return repository.add(item)
+        return repository.add(Account(account = item.account, password = item.password, email = item.email))
     }
+
 
     override suspend fun update(t: Account): Account {
         return repository.update(t)
     }
 
-    override suspend fun delete(id: String): Account {
+    override suspend fun delete(id: String): Boolean {
         return repository.delete(id)
     }
 }

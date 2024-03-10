@@ -15,14 +15,13 @@ import java.time.LocalDateTime
 
 @Serializable
 class Account(
-    @Serializable(with = UUIDSerializer::class)
-    val id: UUID,
+    val id: String? = null,
     val account: String,
     val password: String,
     val email: String,
     @Serializable(with = LocaleDateTimeSerializer::class)
-    val createDate: LocalDateTime,
+    val createDate: LocalDateTime? = null,
     @Serializable(with = LocaleDateTimeSerializer::class)
-    val updateDate: LocalDateTime,
+    val updateDate: LocalDateTime? = null,
 )
 

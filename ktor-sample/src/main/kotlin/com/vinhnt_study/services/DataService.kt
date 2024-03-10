@@ -6,8 +6,8 @@ interface DataService<T, R> {
     suspend fun findAll(): List<T>
     suspend fun findById(id: String): T?
     suspend fun add(item: R): T
-    suspend fun update(t: T): T
-    suspend fun delete(id: String): T
+    suspend fun update(item: T): T
+    suspend fun delete(id: String): Boolean
 }
 
 
@@ -15,7 +15,7 @@ interface DataService<T, R> {
 interface AuthDataService<T, R> {
     suspend fun findAll(accountId: String): List<T>
     suspend fun findById(id: String, accountId: String): T?
-    suspend fun add(item: R, accountId: String): T
+    suspend fun add(item: T, accountId: String): T
     suspend fun update(t: T, accountId: String): T
-    suspend fun delete(id: String, accountId: String): T
+    suspend fun delete(id: String, accountId: String): Boolean
 }

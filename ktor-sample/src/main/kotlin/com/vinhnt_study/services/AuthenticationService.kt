@@ -2,9 +2,9 @@ package com.vinhnt_study.services
 
  import com.auth0.jwt.JWT
  import com.auth0.jwt.algorithms.Algorithm
+ import com.vinhnt_study.models.Account
  import com.vinhnt_study.models.authentication.LoginResponse
- import com.vinhnt_study.models.authentication.RegisterRequest
-import com.vinhnt_study.repositories.AccountRepository
+ import com.vinhnt_study.repositories.AccountRepository
 import com.vinhnt_study.repositories.AccountRepositoryImpl
  import org.mindrot.jbcrypt.BCrypt
  import java.util.*
@@ -27,16 +27,16 @@ class  AuthenticationServiceImpl : AuthenticationService  {
     private val repository : AccountRepository =  AccountRepositoryImpl()
 
     override suspend fun loginByAccount(account: String, password: String) : LoginResponse {
-        val account = repository.findByAccount(account) ?: throw IllegalArgumentException("Account not found")
+        val existsAccount = repository.findByAccount(account) ?: throw IllegalArgumentException("Account not found")
 
-        if (!BCrypt.checkpw(password, account.password)) {
+        if (!BCrypt.checkpw(password, existsAccount.password)) {
             throw IllegalArgumentException("Password is incorrect")
         }
 
         val token = JWT.create()
-            .withClaim("account_id", account.id.toString())
-            .withClaim("account", account.account)
-            .withClaim("email", account.email)
+            .withClaim("account_id", existsAccount.id.toString())
+            .withClaim("account", existsAccount.account)
+            .withClaim("email", existsAccount.email)
             .withExpiresAt(Date(System.currentTimeMillis() + 6000000))
             .sign(Algorithm.HMAC256("app-secret"))
 
@@ -57,7 +57,7 @@ class  AuthenticationServiceImpl : AuthenticationService  {
         }
 
         repository.add(
-            RegisterRequest(
+            Account(
                 email = email,
                 account = account,
                 password = BCrypt.hashpw(password, BCrypt.gensalt()),
