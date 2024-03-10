@@ -1,9 +1,12 @@
 package com.vinhnt_study.db
 
+import com.vinhnt_study.db.Categories.references
+import com.vinhnt_study.db.MoneySources.references
 import com.vinhnt_study.models.AuthData
 import com.vinhnt_study.models.Category
 import com.vinhnt_study.models.MoneySource
 import com.vinhnt_study.models.MoneyType
+import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 
@@ -13,12 +16,12 @@ import java.util.*
 
 object Moneys : Table(){
     val id = uuid("id")
-    val accountId = reference("account_id", Accounts.id)
+    val accountId = uuid("account_id").references(Accounts.id)
+    val category = uuid("category_id").references(Categories.id)
+    val sourceId = uuid("source_id").references(MoneySources.id)
     val amount = double("amount")
     val type = integer("type")
-    val category = reference("category_id", Categories.id)
     val description = varchar("description", 500)
-    val sourceId = reference("source_id", MoneySources.id)
     val date = datetime("date")
     val createDate = datetime("create_date")
     val updateDate = datetime("update_date")
@@ -28,7 +31,7 @@ object Moneys : Table(){
 
 object MoneySources : Table("money_sources") {
     val id = uuid("id")
-    val accountId = reference("account_id", Accounts.id)
+    val accountId = uuid("account_id").references(Accounts.id)
     val name = varchar("name", 100)
     val createDate = datetime("create_date")
     val updateDate = datetime("update_date")
@@ -38,7 +41,7 @@ object MoneySources : Table("money_sources") {
 
 object Categories : Table() {
     val id = uuid("id")
-    val accountId = reference("account_id", Accounts.id)
+    val accountId = uuid("account_id").references(Accounts.id)
     val type = integer("type")
     val name = varchar("name", 100)
     val createDate = datetime("create_date")
@@ -46,3 +49,11 @@ object Categories : Table() {
 
     override val primaryKey = PrimaryKey(id)
 }
+
+
+//object MoneySources2 : IntIdTable("money_sources_2") {
+//    val accountId = reference("account_id", Accounts2.id)
+//    val name = varchar("name", 100)
+//    val createDate = datetime("create_date")
+//    val updateDate = datetime("update_date")
+// }

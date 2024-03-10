@@ -9,7 +9,7 @@ import java.time.LocalDateTime
 import java.util.*
 
 @Serializable
-open class Category(
+open class Category (
     val id: String? = null,
     val name: String,
     @Serializable(with = MoneyTypeSerializer::class)
