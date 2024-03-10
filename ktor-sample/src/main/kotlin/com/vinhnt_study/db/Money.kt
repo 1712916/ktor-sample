@@ -1,23 +1,13 @@
 package com.vinhnt_study.db
 
-import com.vinhnt_study.db.Categories.references
-import com.vinhnt_study.db.MoneySources.references
-import com.vinhnt_study.models.AuthData
-import com.vinhnt_study.models.Category
-import com.vinhnt_study.models.MoneySource
-import com.vinhnt_study.models.MoneyType
-import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 
 import org.jetbrains.exposed.sql.javatime.datetime
-import java.time.LocalDateTime
-import java.util.*
 
 object Moneys : Table(){
     val id = uuid("id")
     val accountId = uuid("account_id").references(Accounts.id)
-    val category = uuid("category_id").references(Categories.id)
+    val categoryId = uuid("category_id").references(Categories.id)
     val sourceId = uuid("source_id").references(MoneySources.id)
     val amount = double("amount")
     val type = integer("type")

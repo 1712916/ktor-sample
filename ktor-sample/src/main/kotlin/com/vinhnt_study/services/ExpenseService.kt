@@ -1,16 +1,28 @@
 package com.vinhnt_study.services
 
 import com.vinhnt_study.models.Money
-import com.vinhnt_study.models.MoneyRequest
 import com.vinhnt_study.repositories.ExpenseRepository
 import com.vinhnt_study.repositories.ExpenseRepositoryImpl
+import com.vinhnt_study.utils.toDate
 
 //create ExpenseService interface
-interface ExpenseService : AuthDataService<Money, String>
+interface ExpenseService : AuthDataService<Money, String> {
+    suspend fun search( accountId: String, fromDate: String, toDate: String, categoryIds: List<String>? = null, sourceIds: List<String>? = null): List<Money>
+}
 
 //create ExpenseServiceImpl class
 class ExpenseServiceImpl  : ExpenseService  {
     private val repository : ExpenseRepository  = ExpenseRepositoryImpl()
+    override suspend fun search(
+        accountId: String,
+        fromDate: String,
+        toDate: String,
+        categoryIds: List<String>?,
+        sourceIds: List<String>?
+    ): List<Money> {
+        return repository.search(accountId, fromDate.toDate(), toDate.toDate(), categoryIds, sourceIds)
+    }
+
     override suspend fun findAll(accountId: String): List<Money> {
         return  repository.findAll(accountId)
     }

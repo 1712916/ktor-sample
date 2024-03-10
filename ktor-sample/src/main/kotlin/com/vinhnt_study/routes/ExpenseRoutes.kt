@@ -6,6 +6,7 @@ import com.vinhnt_study.models.ResponseData
 import com.vinhnt_study.services.ExpenseServiceImpl
 import com.vinhnt_study.utils.getAccountId
 import com.vinhnt_study.utils.parseRequest
+import com.vinhnt_study.utils.toUUID
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.response.*
@@ -74,6 +75,26 @@ fun Route.expenseRoutes() {
             //return the deleted expense with a 200 OK status and json format
             call.respond(
                 ResponseData.success(deletedExpense)
+            )
+        }
+
+
+        //search from date to date
+        get("api/expenses/search") {
+            //get the from date and to date from the request
+            val fromDate = call.request.queryParameters["fromDate"] ?: ""
+            val toDate = call.request.queryParameters["toDate"] ?: ""
+            val categoryIds = call.request.queryParameters.getAll("categoryId")
+            val sourceIds = call.request.queryParameters.getAll("sourceId")
+            //call the service to search for expenses from date to date
+            val expenses = expenseService.search(
+                accountId = getAccountId(call),
+                fromDate = fromDate, toDate = toDate,
+                categoryIds = categoryIds, sourceIds = sourceIds,
+            )
+            //return the expenses with a 200 OK status and json format
+            call.respond(
+                ResponseData.success(expenses)
             )
         }
     }
