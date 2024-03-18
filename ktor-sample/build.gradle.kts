@@ -49,4 +49,5 @@ dependencies {
     implementation("org.mindrot:jbcrypt:$bcrypt_version")
     testImplementation("io.ktor:ktor-server-tests-jvm")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
+    implementation("io.ktor:ktor-server-cors:$ktor_version")
 }
