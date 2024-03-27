@@ -7,24 +7,35 @@ import com.vinhnt_study.utils.toDate
 
 //create ExpenseService interface
 interface ExpenseService : AuthDataService<Money, String> {
-    suspend fun search( accountId: String, fromDate: String, toDate: String, categoryIds: List<String>? = null, sourceIds: List<String>? = null): List<Money>
-}
-
-//create ExpenseServiceImpl class
-class ExpenseServiceImpl  : ExpenseService  {
-    private val repository : ExpenseRepository  = ExpenseRepositoryImpl()
-    override suspend fun search(
+    suspend fun search(
         accountId: String,
         fromDate: String,
         toDate: String,
-        categoryIds: List<String>?,
-        sourceIds: List<String>?
+        categoryIds: List<String>? = null,
+        sourceIds: List<String>? = null
+    ): List<Money>
+
+    suspend fun getExpenseListByDate(accountId: String, date: String): List<Money>
+}
+
+//create ExpenseServiceImpl class
+class ExpenseServiceImpl : ExpenseService {
+    private val repository: ExpenseRepository = ExpenseRepositoryImpl()
+    override suspend fun search(
+        accountId: String, fromDate: String, toDate: String, categoryIds: List<String>?, sourceIds: List<String>?
     ): List<Money> {
         return repository.search(accountId, fromDate.toDate(), toDate.toDate(), categoryIds, sourceIds)
     }
 
+    override suspend fun getExpenseListByDate(accountId: String, date: String): List<Money> {
+        //validate date
+
+        //is valid
+        return repository.getExpenseListByDate(accountId, date.toDate())
+    }
+
     override suspend fun findAll(accountId: String): List<Money> {
-        return  repository.findAll(accountId)
+        return repository.findAll(accountId)
     }
 
     override suspend fun findById(id: String, accountId: String): Money? {

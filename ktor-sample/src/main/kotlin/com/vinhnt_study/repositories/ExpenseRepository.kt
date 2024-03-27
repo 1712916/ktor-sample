@@ -2,10 +2,12 @@ package com.vinhnt_study.repositories
 
 import com.vinhnt_study.db.*
 import com.vinhnt_study.models.*
+import com.vinhnt_study.utils.toDate
 import com.vinhnt_study.utils.toLocalDateTime
 import com.vinhnt_study.utils.toUUID
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.javatime.date
 import java.time.LocalDateTime
 import java.util.*
 
@@ -18,6 +20,11 @@ interface ExpenseRepository : AuthDataRepository<Money, String> {
         toDate: Date,
         categoryIds: List<String>? = null,
         sourceId: List<String>? = null,
+    ): List<Money>
+
+    suspend fun getExpenseListByDate(
+        accountId: String,
+        date: Date,
     ): List<Money>
 }
 
@@ -52,11 +59,19 @@ class ExpenseRepositoryImpl : ExpenseRepository {
         }.filter {
             //TODO("create a flag to handle condition or, and")
 
-            (categoryUUIDList == null || it[Moneys.categoryId] in categoryUUIDList) ||
-            (sourceUUIDList == null || it[Moneys.sourceId] in sourceUUIDList)
+            (categoryUUIDList == null || it[Moneys.categoryId] in categoryUUIDList) || (sourceUUIDList == null || it[Moneys.sourceId] in sourceUUIDList)
         }
 
             .map { resultRowToMoney(it) }.toList()
+    }
+
+    override suspend fun getExpenseListByDate(accountId: String, date: Date): List<Money> = DatabaseSingleton.dbQuery {
+        val currentDate = date.toLocalDateTime()
+        val nextDate = currentDate.plusDays(1)
+
+        Moneys.innerJoin(Categories).innerJoin(MoneySources).select {
+            (Moneys.date greaterEq currentDate) and (Moneys.date less nextDate) and (Moneys.accountId eq accountId.toUUID())
+        }.map { resultRowToMoney(it) }.toList()
     }
 
 

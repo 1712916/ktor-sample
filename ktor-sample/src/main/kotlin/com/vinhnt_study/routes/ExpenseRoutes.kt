@@ -97,6 +97,23 @@ fun Route.expenseRoutes() {
                 ResponseData.success(expenses)
             )
         }
+
+        //search from date to date
+        get("api/expenses/date/{date}") {
+            val date = call.parameters["date"] ?: ""
+
+            println("route request date: $date")
+
+            //call the service to search for expenses from date to date
+            val expenses = expenseService.getExpenseListByDate(
+                accountId = getAccountId(call),
+                date = date
+            )
+            //return the expenses with a 200 OK status and json format
+            call.respond(
+                ResponseData.success(expenses)
+            )
+        }
     }
 }
 
