@@ -24,12 +24,14 @@ fun main() {
 fun Application.module() {
     install(CORS) {
         anyHost()
+        allowMethod(HttpMethod.Get)
         allowMethod(HttpMethod.Options)
         allowMethod(HttpMethod.Put)
         allowMethod(HttpMethod.Patch)
         allowMethod(HttpMethod.Delete)
         allowHeader(HttpHeaders.ContentType)
         allowHeader(HttpHeaders.AccessControlAllowOrigin)
+        allowHeader(HttpHeaders.Authorization)
     }
     DatabaseSingleton.init()
     install(Authentication) {
