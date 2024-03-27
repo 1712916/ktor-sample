@@ -37,7 +37,7 @@ class  AuthenticationServiceImpl : AuthenticationService  {
             .withClaim("account_id", existsAccount.id.toString())
             .withClaim("account", existsAccount.account)
             .withClaim("email", existsAccount.email)
-            .withExpiresAt(Date(System.currentTimeMillis() + 6000000))
+            .withExpiresAt(Date(System.currentTimeMillis() + 60000000))
             .sign(Algorithm.HMAC256("app-secret"))
 
         return LoginResponse(token)

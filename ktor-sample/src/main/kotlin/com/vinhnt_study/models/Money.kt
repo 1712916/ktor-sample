@@ -15,7 +15,7 @@ data class Money(
     @Serializable(with = MoneyTypeSerializer::class)
     val type: MoneyType,
     val category: Category,
-    val description: String,
+    val description: String? = null,
     val source: MoneySource,
     @Serializable(with = LocaleDateTimeSerializer::class)
     val date: LocalDateTime? = null,

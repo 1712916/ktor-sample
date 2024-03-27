@@ -11,7 +11,7 @@ object Moneys : Table(){
     val sourceId = uuid("source_id").references(MoneySources.id)
     val amount = double("amount")
     val type = integer("type")
-    val description = varchar("description", 500)
+    val description = varchar("description", 500).nullable()
     val date = datetime("date")
     val createDate = datetime("create_date")
     val updateDate = datetime("update_date")

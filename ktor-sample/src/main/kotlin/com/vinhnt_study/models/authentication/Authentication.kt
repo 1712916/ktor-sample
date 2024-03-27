@@ -9,7 +9,7 @@ open class LoginRequest(
 
 @Serializable
 class RegisterRequest(
-    val email: String, val account: String, val password: String
+    val email: String = "", val account: String, val password: String
 )
 
 @Serializable
