@@ -5,13 +5,11 @@ import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
-
+import io.ktor.server.application.*
+import io.ktor.server.routing.*
 object DatabaseSingleton {
-    fun init() {
+    fun init(url: String, user: String, password: String) {
         Class.forName("org.postgresql.Driver")
-        val url = "jdbc:postgresql://localhost:32774/tracking_money"
-        val user = "postgres"
-        val password = "postgrespw"
 
         val database = Database.connect(
             url = url,

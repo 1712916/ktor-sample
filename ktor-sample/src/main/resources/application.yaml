@@ -1,4 +1,17 @@
-postgres:
-  url : "jdbc:postgresql://localhost:32774/tracking_money"
-  user : "postgres"
-  password : "postgrespw"
+ktor:
+  development: true
+  deployment:
+    watch:
+      - classes
+    port: 8080
+  application:
+    modules:
+      - com.vinhnt_study.ApplicationKt.module
+  database:
+    url: "jdbc:postgresql://localhost:32768/tracking_money_prod"
+    user: "postgres"
+    password: "postgrespw"
+    dev:
+      url: "jdbc:postgresql://localhost:32768/tracking_money"
+      user: "postgres"
+      password: "postgrespw"
