@@ -9,7 +9,15 @@ fun String.toUUID(): UUID {
 
 //string to date
 fun String.toDate(pattern: String = "yyyy-MM-dd"): Date {
-    val dateFormat = SimpleDateFormat(pattern)
-    return dateFormat.parse(this)
+   try {
+       if (length > pattern.length) {
+           throw Exception()
+       }
+
+       val dateFormat = SimpleDateFormat(pattern)
+       return dateFormat.parse(this)
+   } catch (e: Exception) {
+       throw Exception("Invalid date")
+   }
 }
 
