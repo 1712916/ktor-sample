@@ -2,15 +2,35 @@ package com.vinhnt_study.repositories
 
 import com.vinhnt_study.db.*
 import com.vinhnt_study.models.*
+import com.vinhnt_study.utils.getAllDaysBetweenDates
 import com.vinhnt_study.utils.toDate
 import com.vinhnt_study.utils.toLocalDateTime
 import com.vinhnt_study.utils.toUUID
+import io.ktor.server.util.*
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.javatime.date
 import java.time.LocalDateTime
 import java.util.*
 
+interface TotalExpenseRepository {
+    suspend fun getTotalExpenseByDate(
+        accountId: String,
+        date: Date,
+    ): Double
+
+    suspend fun getTotalExpenseByDates(
+        accountId: String,
+        from: Date,
+        to: Date,
+    ): Double
+
+    suspend fun getListTotalExpenseByDates(
+        accountId: String,
+        from: Date,
+        to: Date,
+    ): List<DateMoney>
+}
 
 interface ExpenseRepository : AuthDataRepository<Money, String> {
     //search from date to date
@@ -26,10 +46,12 @@ interface ExpenseRepository : AuthDataRepository<Money, String> {
         accountId: String,
         date: Date,
     ): List<Money>
+
+
 }
 
 //expense repository implementation
-class ExpenseRepositoryImpl : ExpenseRepository {
+class ExpenseRepositoryImpl : ExpenseRepository, TotalExpenseRepository {
     private fun resultRowToMoney(row: ResultRow) = Money(
         id = row[Moneys.id].toString(),
         amount = row[Moneys.amount],
@@ -72,6 +94,37 @@ class ExpenseRepositoryImpl : ExpenseRepository {
         Moneys.innerJoin(Categories).innerJoin(MoneySources).select {
             (Moneys.date greaterEq currentDate) and (Moneys.date less nextDate) and (Moneys.accountId eq accountId.toUUID())
         }.map { resultRowToMoney(it) }.toList()
+    }
+
+    override suspend fun getTotalExpenseByDate(accountId: String, date: Date): Double {
+        val expenseList = getExpenseListByDate(accountId,date)
+        return  expenseList.fold(0.0) { c, e ->
+              c + e.amount
+        }
+    }
+
+    override suspend fun getTotalExpenseByDates(accountId: String, from: Date, to: Date): Double {
+        val days = getAllDaysBetweenDates(from, to)
+
+        var total = 0.0
+
+        days.forEach {
+            total += getTotalExpenseByDate(accountId, it)
+        }
+
+        return total
+    }
+
+    override suspend fun getListTotalExpenseByDates(accountId: String, from: Date, to: Date): List<DateMoney> {
+        val days = getAllDaysBetweenDates(from, to)
+
+        val list = mutableListOf<DateMoney>()
+
+        days.forEach {
+            list.add(DateMoney(date = it, amount =  getTotalExpenseByDate(accountId, it)))
+        }
+
+        return list
     }
 
 
@@ -131,5 +184,4 @@ class ExpenseRepositoryImpl : ExpenseRepository {
     override suspend fun delete(id: String, accountId: String): Boolean = DatabaseSingleton.dbQuery {
         Moneys.deleteWhere { Moneys.id eq id.toUUID() and (Moneys.accountId eq accountId.toUUID()) } > 0
     }
-
 }

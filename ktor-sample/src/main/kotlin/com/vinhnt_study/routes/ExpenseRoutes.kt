@@ -4,8 +4,11 @@ import com.vinhnt_study.models.Money
 import com.vinhnt_study.models.MoneyRequest
 import com.vinhnt_study.models.ResponseData
 import com.vinhnt_study.services.ExpenseServiceImpl
+import com.vinhnt_study.services.TotalExpenseService
+import com.vinhnt_study.services.TotalExpenseServiceImpl
 import com.vinhnt_study.utils.getAccountId
 import com.vinhnt_study.utils.parseRequest
+import com.vinhnt_study.utils.toDate
 import com.vinhnt_study.utils.toUUID
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -114,6 +117,80 @@ fun Route.expenseRoutes() {
                 ResponseData.success(expenses)
             )
         }
+        get("api/expenses/total/{date}") {
+            val date = call.parameters["date"] ?: ""
+
+            println("route request date: $date")
+
+            //call the service to search for expenses from date to date
+            val expenses = expenseService.getExpenseListByDate(
+                accountId = getAccountId(call),
+                date = date
+            )
+            //return the expenses with a 200 OK status and json format
+            call.respond(
+                ResponseData.success(expenses)
+            )
+        }
     }
 }
+
+
+fun Route.totalExpenseRoutes() {
+    //declare expense service
+    val expenseService : TotalExpenseService = TotalExpenseServiceImpl()
+
+    authenticate("auth-jwt") {
+
+        get("api/expenses/date-total/{date}") {
+            val date = call.parameters["date"] ?: ""
+
+            println("route request date: $date")
+
+            //call the service to search for expenses from date to date
+            val expenses = expenseService.getTotalExpenseByDate(
+                accountId = getAccountId(call),
+                date = date.toDate()
+            )
+            //return the expenses with a 200 OK status and json format
+            call.respond(
+                ResponseData.success(expenses)
+            )
+        }
+
+        get("api/expenses/total") {
+            val fromDate = call.request.queryParameters["fromDate"] ?: ""
+            val toDate = call.request.queryParameters["toDate"] ?: ""
+
+            //call the service to search for expenses from date to date
+            val expenses = expenseService.getTotalExpenseByDates(
+                accountId = getAccountId(call),
+               from = fromDate.toDate(),
+                to = toDate.toDate(),
+            )
+            //return the expenses with a 200 OK status and json format
+            call.respond(
+                ResponseData.success(expenses)
+            )
+        }
+
+        get("api/expenses/total-list") {
+            val fromDate = call.request.queryParameters["fromDate"] ?: ""
+            val toDate = call.request.queryParameters["toDate"] ?: ""
+
+            //call the service to search for expenses from date to date
+            val expenses = expenseService.getListTotalExpenseByDates(
+                accountId = getAccountId(call),
+                from = fromDate.toDate(),
+                to = toDate.toDate(),
+            )
+            //return the expenses with a 200 OK status and json format
+            call.respond(
+                ResponseData.success(expenses)
+            )
+        }
+    }
+}
+
+
 

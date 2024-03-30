@@ -9,3 +9,26 @@ fun Date.toLocalDateTime(): LocalDateTime {
     val zoneId = ZoneId.systemDefault() // Or specify the desired time zone
     return LocalDateTime.ofInstant(instant, zoneId)
 }
+
+fun LocalDateTime.toDate() : Date {
+    return Date.from(atZone(ZoneId.systemDefault()).toInstant())
+}
+
+fun getAllDaysBetweenDates(startDate: Date, endDate: Date): List<Date> {
+    val days = mutableListOf<Date>()
+    var currentDate = startDate.toLocalDateTime()
+    val endDateTime = endDate.toLocalDateTime()
+    while (!currentDate.isAfter(endDateTime)) {
+        days.add(currentDate.toDate())
+        currentDate = currentDate.plusDays(1)
+    }
+    return days
+}
+
+fun  main() {
+    val d = Date()
+    println("date: ${d}")
+    println("toLocaleDateTime: ${d.toLocalDateTime()}")
+    println("toDate: ${d.toLocalDateTime().toDate()}")
+}
+
