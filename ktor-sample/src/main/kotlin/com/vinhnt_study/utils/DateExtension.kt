@@ -25,6 +25,13 @@ fun getAllDaysBetweenDates(startDate: Date, endDate: Date): List<Date> {
     return days
 }
 
+fun sortDate(from:Date, to: Date) : Pair<Date, Date> {
+    if (from.after(to)) {
+        return  Pair(to, from)
+    }
+    return  Pair(from, to )
+}
+
 fun  main() {
     val d = Date()
     println("date: ${d}")

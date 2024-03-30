@@ -5,6 +5,7 @@ import com.vinhnt_study.models.Money
 import com.vinhnt_study.repositories.ExpenseRepository
 import com.vinhnt_study.repositories.ExpenseRepositoryImpl
 import com.vinhnt_study.repositories.TotalExpenseRepository
+import com.vinhnt_study.utils.sortDate
 import com.vinhnt_study.utils.toDate
 import java.util.*
 
@@ -37,11 +38,13 @@ class TotalExpenseServiceImpl : TotalExpenseService {
     }
 
     override suspend fun getTotalExpenseByDates(accountId: String, from: Date, to: Date): Double {
-        return repository.getTotalExpenseByDates(accountId, from, to)
+        val dates = sortDate(from, to)
+        return repository.getTotalExpenseByDates(accountId, dates.first, dates.second)
     }
 
     override suspend fun getListTotalExpenseByDates(accountId: String, from: Date, to: Date): List<DateMoney> {
-        return repository.getListTotalExpenseByDates(accountId, from, to)
+        val dates = sortDate(from, to)
+        return repository.getListTotalExpenseByDates(accountId, dates.first, dates.second)
     }
-
 }
+
