@@ -18,6 +18,7 @@ fun Application.configureRouting() {
         authenticationRoutes()
         expenseRoutes()
         totalExpenseRoutes()
+        totalExpenseByCategoryRoutes()
         moneySourceRoutes()
         categoryRoutes()
     }

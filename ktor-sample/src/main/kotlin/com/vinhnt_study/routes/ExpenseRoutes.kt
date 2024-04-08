@@ -3,9 +3,7 @@ package com.vinhnt_study.routes
 import com.vinhnt_study.models.Money
 import com.vinhnt_study.models.MoneyRequest
 import com.vinhnt_study.models.ResponseData
-import com.vinhnt_study.services.ExpenseServiceImpl
-import com.vinhnt_study.services.TotalExpenseService
-import com.vinhnt_study.services.TotalExpenseServiceImpl
+import com.vinhnt_study.services.*
 import com.vinhnt_study.utils.getAccountId
 import com.vinhnt_study.utils.parseRequest
 import com.vinhnt_study.utils.toDate
@@ -135,7 +133,6 @@ fun Route.expenseRoutes() {
     }
 }
 
-
 fun Route.totalExpenseRoutes() {
     //declare expense service
     val expenseService : TotalExpenseService = TotalExpenseServiceImpl()
@@ -180,6 +177,30 @@ fun Route.totalExpenseRoutes() {
 
             //call the service to search for expenses from date to date
             val expenses = expenseService.getListTotalExpenseByDates(
+                accountId = getAccountId(call),
+                from = fromDate.toDate(),
+                to = toDate.toDate(),
+            )
+            //return the expenses with a 200 OK status and json format
+            call.respond(
+                ResponseData.success(expenses)
+            )
+        }
+    }
+}
+fun Route.totalExpenseByCategoryRoutes() {
+    //declare expense service
+    val expenseService : TotalExpenseCategoryService = TotalExpenseCategoryServiceImpl()
+
+    authenticate("auth-jwt") {
+
+        //Get list total expense by category from date to date
+        get("api/expenses/category/total") {
+            val fromDate = call.request.queryParameters["fromDate"] ?: ""
+            val toDate = call.request.queryParameters["toDate"] ?: ""
+
+            //call the service to search for expenses from date to date
+            val expenses = expenseService.getListTotalExpenseByCategory(
                 accountId = getAccountId(call),
                 from = fromDate.toDate(),
                 to = toDate.toDate(),
