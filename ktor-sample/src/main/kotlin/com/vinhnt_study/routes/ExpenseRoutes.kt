@@ -135,7 +135,8 @@ fun Route.expenseRoutes() {
 
 fun Route.totalExpenseRoutes() {
     //declare expense service
-    val expenseService : TotalExpenseService = TotalExpenseServiceImpl()
+    val expenseService: TotalExpenseService = TotalExpenseServiceImpl()
+    val monthTotalExpenseService: MonthTotalExpenseService = TotalExpenseServiceImpl()
 
     authenticate("auth-jwt") {
 
@@ -162,7 +163,7 @@ fun Route.totalExpenseRoutes() {
             //call the service to search for expenses from date to date
             val expenses = expenseService.getTotalExpenseByDates(
                 accountId = getAccountId(call),
-               from = fromDate.toDate(),
+                from = fromDate.toDate(),
                 to = toDate.toDate(),
             )
             //return the expenses with a 200 OK status and json format
@@ -186,11 +187,84 @@ fun Route.totalExpenseRoutes() {
                 ResponseData.success(expenses)
             )
         }
+
+        get("api/expenses/moths-total/{year}") {
+            val year = call.parameters["year"] ?: ""
+
+            //call the service to search for expenses from date to date
+            val expenses = monthTotalExpenseService.getTotalExpenseByMonthOfYear(
+                accountId = getAccountId(call),
+                year = year.toInt()
+            )
+            //return the expenses with a 200 OK status and json format
+            call.respond(
+                ResponseData.success(expenses)
+            )
+        }
+
+        get("api/expenses/moth-total") {
+            val month = call.request.queryParameters["month"]?.toInt()
+            val year = call.request.queryParameters["year"]?.toInt()
+
+            if (month == null || year == null) {
+                call.respond(ResponseData.badRequest("Invalid month or year", null))
+            }
+
+            //call the service to search for expenses from date to date
+            val expenses = monthTotalExpenseService.getTotalExpenseByMonth(
+                accountId = getAccountId(call),
+                month = month!!,
+                year = year!!,
+            )
+            //return the expenses with a 200 OK status and json format
+            call.respond(
+                ResponseData.success(expenses)
+            )
+        }
+
+        get("api/expenses/quarters-total/{year}") {
+            val year = call.parameters["year"]?.toInt()
+
+           if (year == null) {
+               call.respond(ResponseData.badRequest("Invalid year", null))
+           }
+
+            //call the service to search for expenses from date to date
+            val expenses = monthTotalExpenseService.getTotalExpenseByQuarterOfYear(
+                accountId = getAccountId(call),
+                year = year!!,
+            )
+            //return the expenses with a 200 OK status and json format
+            call.respond(
+                ResponseData.success(expenses)
+            )
+        }
+
+        get("api/expenses/quarter-total") {
+            val quarter = call.request.queryParameters["quarter"]?.toInt()
+            val year = call.request.queryParameters["year"]?.toInt()
+
+            if (quarter == null || year == null) {
+                call.respond(ResponseData.badRequest("Invalid quarter or year", null))
+            }
+
+            //call the service to search for expenses from date to date
+            val expenses = monthTotalExpenseService.getTotalExpenseByQuater(
+                accountId = getAccountId(call),
+                quarter = quarter!!,
+                year = year!!,
+            )
+            //return the expenses with a 200 OK status and json format
+            call.respond(
+                ResponseData.success(expenses)
+            )
+        }
     }
 }
+
 fun Route.totalExpenseByCategoryRoutes() {
     //declare expense service
-    val expenseService : TotalExpenseCategoryService = TotalExpenseCategoryServiceImpl()
+    val expenseService: TotalExpenseCategoryService = TotalExpenseCategoryServiceImpl()
 
     authenticate("auth-jwt") {
 

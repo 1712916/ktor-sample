@@ -2,14 +2,10 @@ package com.vinhnt_study.repositories
 
 import com.vinhnt_study.db.*
 import com.vinhnt_study.models.*
-import com.vinhnt_study.utils.getAllDaysBetweenDates
-import com.vinhnt_study.utils.toDate
+import com.vinhnt_study.utils.*
 import com.vinhnt_study.utils.toLocalDateTime
-import com.vinhnt_study.utils.toUUID
-import io.ktor.server.util.*
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.javatime.date
 import java.time.LocalDateTime
 import java.util.*
 
@@ -31,6 +27,30 @@ interface TotalExpenseRepository {
         to: Date,
     ): List<DateMoney>
 }
+interface MonthTotalExpenseRepository {
+
+    suspend fun getTotalExpenseByMonth(
+        accountId: String,
+        month: Int,
+        year: Int,
+    ): MonthMoney
+
+    suspend fun getTotalExpenseByMonthOfYear(
+        accountId: String,
+        year: Int,
+    ): List<MonthMoney>
+
+    suspend fun getTotalExpenseByQuater(
+        accountId: String,
+        quarter: Int,
+        year: Int,
+    ): QuarterMoney
+
+    suspend fun getTotalExpenseByQuarterOfYear(
+        accountId: String,
+        year: Int,
+    ): List<QuarterMoney>
+}
 
 interface ExpenseRepository : AuthDataRepository<Money, String> {
     //search from date to date
@@ -51,7 +71,7 @@ interface ExpenseRepository : AuthDataRepository<Money, String> {
 }
 
 //expense repository implementation
-class ExpenseRepositoryImpl : ExpenseRepository, TotalExpenseRepository {
+class ExpenseRepositoryImpl : ExpenseRepository, TotalExpenseRepository, MonthTotalExpenseRepository {
     private fun resultRowToMoney(row: ResultRow) = Money(
         id = row[Moneys.id].toString(),
         amount = row[Moneys.amount],
@@ -189,5 +209,41 @@ class ExpenseRepositoryImpl : ExpenseRepository, TotalExpenseRepository {
 
     override suspend fun delete(id: String, accountId: String): Boolean = DatabaseSingleton.dbQuery {
         Moneys.deleteWhere { Moneys.id eq id.toUUID() and (Moneys.accountId eq accountId.toUUID()) } > 0
+    }
+
+    override suspend fun getTotalExpenseByMonth(accountId: String, month: Int, year: Int): MonthMoney  {
+       val  dates = DateUtils.getStartAndEndDateOfMonth(month, year)
+
+       val amount = getTotalExpenseByDates(accountId, dates.first, dates.second)
+
+        return  MonthMoney(month = month, year = year, amount = amount)
+    }
+
+    override suspend fun getTotalExpenseByMonthOfYear(accountId: String, year: Int): List<MonthMoney> {
+        return  (1..12).map {
+            getTotalExpenseByMonth(accountId, it , year)
+        }
+    }
+
+    override suspend fun getTotalExpenseByQuater(accountId: String, quarter: Int, year: Int): QuarterMoney = DatabaseSingleton.dbQuery {
+       val q = DateUtils.getQuarterRange(year, quarter)
+
+        val fromDate = q.first.toLocalDateTime()
+        val toDate = q.second.toLocalDateTime().plusDays(1)
+        val data = Moneys
+            .slice(
+                Moneys.amount.sum(),
+            )
+            .select {
+                (Moneys.date greaterEq fromDate) and (Moneys.date less toDate) and (Moneys.accountId eq accountId.toUUID())
+            }.single()
+
+        QuarterMoney(quarter = quarter, year = year, amount = data[Moneys.amount.sum()] ?: 0.0)
+    }
+
+    override suspend fun getTotalExpenseByQuarterOfYear(accountId: String, year: Int): List<QuarterMoney> {
+        return  (1..4).map {
+            getTotalExpenseByQuater(accountId, it, year)
+        }
     }
 }

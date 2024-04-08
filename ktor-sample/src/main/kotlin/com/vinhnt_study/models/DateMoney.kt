@@ -11,3 +11,16 @@ data class DateMoney(
     val date: Date,
     val amount: Double,
 )
+@Serializable
+data class MonthMoney(
+    val month: Int,
+    val year: Int,
+    val amount: Double,
+)
+
+@Serializable
+data class QuarterMoney(
+    val quarter: Int,
+    val year: Int,
+    val amount: Double,
+)
