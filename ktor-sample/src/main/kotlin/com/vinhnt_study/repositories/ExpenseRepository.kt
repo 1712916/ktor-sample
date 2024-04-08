@@ -96,23 +96,29 @@ class ExpenseRepositoryImpl : ExpenseRepository, TotalExpenseRepository {
         }.map { resultRowToMoney(it) }.toList()
     }
 
-    override suspend fun getTotalExpenseByDate(accountId: String, date: Date): Double {
-        val expenseList = getExpenseListByDate(accountId,date)
-        return  expenseList.fold(0.0) { c, e ->
-              c + e.amount
-        }
+    override suspend fun getTotalExpenseByDate(accountId: String, date: Date): Double = DatabaseSingleton.dbQuery {
+        val currentDate = date.toLocalDateTime()
+        val nextDate = currentDate.plusDays(1)
+
+        Moneys
+            .slice(
+               Moneys.amount.sum(),
+            )
+            .select {
+            (Moneys.date greaterEq currentDate) and (Moneys.date less nextDate) and (Moneys.accountId eq accountId.toUUID())
+        }.single()[Moneys.amount.sum()] ?: 0.0
     }
 
-    override suspend fun getTotalExpenseByDates(accountId: String, from: Date, to: Date): Double {
-        val days = getAllDaysBetweenDates(from, to)
-
-        var total = 0.0
-
-        days.forEach {
-            total += getTotalExpenseByDate(accountId, it)
-        }
-
-        return total
+    override suspend fun getTotalExpenseByDates(accountId: String, from: Date, to: Date): Double  = DatabaseSingleton.dbQuery {
+        val fromDate = from.toLocalDateTime()
+        val toDate = to.toLocalDateTime().plusDays(1)
+        Moneys
+            .slice(
+                Moneys.amount.sum(),
+            )
+            .select {
+                (Moneys.date greaterEq fromDate) and (Moneys.date less toDate) and (Moneys.accountId eq accountId.toUUID())
+            }.single()[Moneys.amount.sum()] ?: 0.0
     }
 
     override suspend fun getListTotalExpenseByDates(accountId: String, from: Date, to: Date): List<DateMoney> {
