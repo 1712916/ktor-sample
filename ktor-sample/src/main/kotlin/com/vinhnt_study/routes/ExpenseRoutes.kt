@@ -188,7 +188,7 @@ fun Route.totalExpenseRoutes() {
             )
         }
 
-        get("api/expenses/moths-total/{year}") {
+        get("api/expenses/months-total/{year}") {
             val year = call.parameters["year"] ?: ""
 
             //call the service to search for expenses from date to date
@@ -202,7 +202,7 @@ fun Route.totalExpenseRoutes() {
             )
         }
 
-        get("api/expenses/moth-total") {
+        get("api/expenses/month-total") {
             val month = call.request.queryParameters["month"]?.toInt()
             val year = call.request.queryParameters["year"]?.toInt()
 
