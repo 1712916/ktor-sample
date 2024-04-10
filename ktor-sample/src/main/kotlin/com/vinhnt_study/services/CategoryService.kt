@@ -1,33 +1,35 @@
 package com.vinhnt_study.services
 
 import com.vinhnt_study.models.Category
+import com.vinhnt_study.models.CategoryCount
+import com.vinhnt_study.repositories.CategoryCountRepository
+import com.vinhnt_study.repositories.CategoryCountRepositoryImpl
 import com.vinhnt_study.repositories.CategoryRepository
 import com.vinhnt_study.repositories.CategoryRepositoryImpl
 
-interface  CategoryService : AuthDataService<Category, String>
+interface  CategoryCountService  {
+    suspend fun countAll(account: String): List<CategoryCount>
+    suspend fun countById(account: String, id: String): CategoryCount
+    suspend fun countByIds(account: String, ids: List<String>): List<CategoryCount>
+}
 
-class CategoryServiceImpl : CategoryService {
+class CategoryCountServiceImpl : CategoryCountService {
 
     //declare category repository
-    private val repository : CategoryRepository = CategoryRepositoryImpl()
-
-    override suspend fun findAll(accountId: String): List<Category> {
-        return  repository.findAll(accountId)
+    private val repository : CategoryCountRepository = CategoryCountRepositoryImpl()
+    override suspend fun countAll(account: String): List<CategoryCount> {
+        return repository.countAll(account)
     }
 
-    override suspend fun findById(id: String, accountId: String): Category? {
-        return  repository.findById(id, accountId)
+    override suspend fun countById(account: String, id: String): CategoryCount {
+        return repository.countById(account, id)
     }
 
-    override suspend fun add(item: Category, accountId: String): Category {
-        return repository.add(item, accountId)
-    }
+    override suspend fun countByIds(account: String, ids: List<String>): List<CategoryCount> {
+        if (ids.isEmpty()) {
+            return  emptyList()
+        }
 
-    override suspend fun update(t: Category, accountId: String): Category {
-        return repository.update(t, accountId)
-    }
-
-    override suspend fun delete(id: String, accountId: String): Boolean {
-        return repository.delete(id, accountId)
+        return repository.countByIds(account, ids)
     }
 }

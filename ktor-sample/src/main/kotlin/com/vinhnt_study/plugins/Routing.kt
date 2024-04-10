@@ -21,5 +21,6 @@ fun Application.configureRouting() {
         totalExpenseByCategoryRoutes()
         moneySourceRoutes()
         categoryRoutes()
+        categoryCountRoutes()
     }
 }

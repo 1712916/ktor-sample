@@ -2,6 +2,8 @@ package com.vinhnt_study.routes
 
 import com.vinhnt_study.models.Category
 import com.vinhnt_study.models.ResponseData
+import com.vinhnt_study.services.CategoryCountService
+import com.vinhnt_study.services.CategoryCountServiceImpl
 import com.vinhnt_study.services.CategoryService
 import com.vinhnt_study.services.CategoryServiceImpl
 import com.vinhnt_study.utils.getAccountId
@@ -49,6 +51,29 @@ fun Route.categoryRoutes() {
             //get id parameter
             val id = call.parameters["id"] ?: ""
             call.respond(ResponseData.success(categoryService.delete(id, getAccountId(call))))
+        }
+    }
+}
+
+fun Route.categoryCountRoutes() {
+    val categoryService: CategoryCountService = CategoryCountServiceImpl()
+
+    authenticate("auth-jwt") {
+
+        get("api/categories-count") {
+            call.respond(ResponseData.success(categoryService.countAll(getAccountId(call))))
+        }
+
+        get("api/categories-count/{id}") {
+         val id = call.parameters["id"] ?: ""
+            call.respond(ResponseData.success(categoryService.countById(getAccountId(call), id)))
+        }
+
+        get("api/categories-count/by-ids") {
+
+            val ids = call.request.queryParameters.getAll("id") ?: emptyList()
+
+            call.respond(ResponseData.success(categoryService.countByIds(getAccountId(call), ids)))
         }
     }
 }
