@@ -3,7 +3,7 @@ package com.vinhnt_study.repositories
 import com.vinhnt_study.db.*
 import com.vinhnt_study.models.*
 import com.vinhnt_study.utils.*
-import com.vinhnt_study.utils.toLocalDateTime
+import com.vinhnt_study.utils.toLocalDate
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import java.time.LocalDateTime
@@ -27,6 +27,7 @@ interface TotalExpenseRepository {
         to: Date,
     ): List<DateMoney>
 }
+
 interface MonthTotalExpenseRepository {
 
     suspend fun getTotalExpenseByMonth(
@@ -97,7 +98,7 @@ class ExpenseRepositoryImpl : ExpenseRepository, TotalExpenseRepository, MonthTo
         val categoryUUIDList: List<UUID>? = categoryIds?.map { it.trim().toUUID() }?.toList()
         val sourceUUIDList: List<UUID>? = sourceId?.map { it.trim().toUUID() }?.toList()
         Moneys.innerJoin(Categories).innerJoin(MoneySources).select {
-            (Moneys.date greaterEq fromDate.toLocalDateTime()) and (Moneys.date lessEq toDate.toLocalDateTime()) and (Moneys.accountId eq accountId.toUUID())
+            (Moneys.date greaterEq fromDate.toLocalDate()) and (Moneys.date lessEq toDate.toLocalDate()) and (Moneys.accountId eq accountId.toUUID())
         }.filter {
             //TODO("create a flag to handle condition or, and")
 
@@ -108,7 +109,7 @@ class ExpenseRepositoryImpl : ExpenseRepository, TotalExpenseRepository, MonthTo
     }
 
     override suspend fun getExpenseListByDate(accountId: String, date: Date): List<Money> = DatabaseSingleton.dbQuery {
-        val currentDate = date.toLocalDateTime()
+        val currentDate = date.toLocalDate()
         val nextDate = currentDate.plusDays(1)
 
         Moneys.innerJoin(Categories).innerJoin(MoneySources).select {
@@ -117,29 +118,30 @@ class ExpenseRepositoryImpl : ExpenseRepository, TotalExpenseRepository, MonthTo
     }
 
     override suspend fun getTotalExpenseByDate(accountId: String, date: Date): Double = DatabaseSingleton.dbQuery {
-        val currentDate = date.toLocalDateTime()
+        val currentDate = date.toLocalDate()
         val nextDate = currentDate.plusDays(1)
 
-        Moneys
-            .slice(
-               Moneys.amount.sum(),
-            )
-            .select {
-            (Moneys.date greaterEq currentDate) and (Moneys.date less nextDate) and (Moneys.accountId eq accountId.toUUID())
-        }.single()[Moneys.amount.sum()] ?: 0.0
-    }
-
-    override suspend fun getTotalExpenseByDates(accountId: String, from: Date, to: Date): Double  = DatabaseSingleton.dbQuery {
-        val fromDate = from.toLocalDateTime()
-        val toDate = to.toLocalDateTime().plusDays(1)
         Moneys
             .slice(
                 Moneys.amount.sum(),
             )
             .select {
-                (Moneys.date greaterEq fromDate) and (Moneys.date less toDate) and (Moneys.accountId eq accountId.toUUID())
+                (Moneys.date greaterEq currentDate) and (Moneys.date less nextDate) and (Moneys.accountId eq accountId.toUUID())
             }.single()[Moneys.amount.sum()] ?: 0.0
     }
+
+    override suspend fun getTotalExpenseByDates(accountId: String, from: Date, to: Date): Double =
+        DatabaseSingleton.dbQuery {
+            val fromDate = from.toLocalDate()
+            val toDate = to.toLocalDate().plusDays(1)
+            Moneys
+                .slice(
+                    Moneys.amount.sum(),
+                )
+                .select {
+                    (Moneys.date greaterEq fromDate) and (Moneys.date less toDate) and (Moneys.accountId eq accountId.toUUID())
+                }.single()[Moneys.amount.sum()] ?: 0.0
+        }
 
     override suspend fun getListTotalExpenseByDates(accountId: String, from: Date, to: Date): List<DateMoney> {
         val days = getAllDaysBetweenDates(from, to)
@@ -147,7 +149,7 @@ class ExpenseRepositoryImpl : ExpenseRepository, TotalExpenseRepository, MonthTo
         val list = mutableListOf<DateMoney>()
 
         days.forEach {
-            list.add(DateMoney(date = it, amount =  getTotalExpenseByDate(accountId, it)))
+            list.add(DateMoney(date = it, amount = getTotalExpenseByDate(accountId, it)))
         }
 
         return list
@@ -155,7 +157,18 @@ class ExpenseRepositoryImpl : ExpenseRepository, TotalExpenseRepository, MonthTo
 
 
     override suspend fun findAll(accountId: String): List<Money> = DatabaseSingleton.dbQuery {
+        (Moneys innerJoin Categories innerJoin MoneySources)
+            .select { Moneys.accountId eq accountId.toUUID() }
+            .orderBy(
+                Moneys.date to SortOrder.DESC,
+                Moneys.amount to SortOrder.DESC,
+                )
+            .map { resultRowToMoney(it) }
+    }
+
+    suspend fun findAll2(accountId: String, offset: Int, limit: Int): List<Money> = DatabaseSingleton.dbQuery {
         (Moneys innerJoin Categories innerJoin MoneySources).select { Moneys.accountId eq accountId.toUUID() }
+            .limit(limit, offset.toLong())
             .map { resultRowToMoney(it) }
     }
 
@@ -211,38 +224,39 @@ class ExpenseRepositoryImpl : ExpenseRepository, TotalExpenseRepository, MonthTo
         Moneys.deleteWhere { Moneys.id eq id.toUUID() and (Moneys.accountId eq accountId.toUUID()) } > 0
     }
 
-    override suspend fun getTotalExpenseByMonth(accountId: String, month: Int, year: Int): MonthMoney  {
-       val  dates = DateUtils.getStartAndEndDateOfMonth(month, year)
+    override suspend fun getTotalExpenseByMonth(accountId: String, month: Int, year: Int): MonthMoney {
+        val dates = DateUtils.getStartAndEndDateOfMonth(month, year)
 
-       val amount = getTotalExpenseByDates(accountId, dates.first, dates.second)
+        val amount = getTotalExpenseByDates(accountId, dates.first, dates.second)
 
-        return  MonthMoney(month = month, year = year, amount = amount)
+        return MonthMoney(month = month, year = year, amount = amount)
     }
 
     override suspend fun getTotalExpenseByMonthOfYear(accountId: String, year: Int): List<MonthMoney> {
-        return  (1..12).map {
-            getTotalExpenseByMonth(accountId, it , year)
+        return (1..12).map {
+            getTotalExpenseByMonth(accountId, it, year)
         }
     }
 
-    override suspend fun getTotalExpenseByQuater(accountId: String, quarter: Int, year: Int): QuarterMoney = DatabaseSingleton.dbQuery {
-       val q = DateUtils.getQuarterRange(year, quarter)
+    override suspend fun getTotalExpenseByQuater(accountId: String, quarter: Int, year: Int): QuarterMoney =
+        DatabaseSingleton.dbQuery {
+            val q = DateUtils.getQuarterRange(year, quarter)
 
-        val fromDate = q.first.toLocalDateTime()
-        val toDate = q.second.toLocalDateTime().plusDays(1)
-        val data = Moneys
-            .slice(
-                Moneys.amount.sum(),
-            )
-            .select {
-                (Moneys.date greaterEq fromDate) and (Moneys.date less toDate) and (Moneys.accountId eq accountId.toUUID())
-            }.single()
+            val fromDate = q.first.toLocalDate()
+            val toDate = q.second.toLocalDate().plusDays(1)
+            val data = Moneys
+                .slice(
+                    Moneys.amount.sum(),
+                )
+                .select {
+                    (Moneys.date greaterEq fromDate) and (Moneys.date less toDate) and (Moneys.accountId eq accountId.toUUID())
+                }.single()
 
-        QuarterMoney(quarter = quarter, year = year, amount = data[Moneys.amount.sum()] ?: 0.0)
-    }
+            QuarterMoney(quarter = quarter, year = year, amount = data[Moneys.amount.sum()] ?: 0.0)
+        }
 
     override suspend fun getTotalExpenseByQuarterOfYear(accountId: String, year: Int): List<QuarterMoney> {
-        return  (1..4).map {
+        return (1..4).map {
             getTotalExpenseByQuater(accountId, it, year)
         }
     }

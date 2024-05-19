@@ -52,13 +52,27 @@ object LocaleDateTimeSerializer : KSerializer<LocalDateTime> {
     }
 
     override val descriptor: SerialDescriptor
-        get() =   PrimitiveSerialDescriptor("LOCALEDATE", PrimitiveKind.STRING)
+        get() =   PrimitiveSerialDescriptor("LOCALEDATETIME", PrimitiveKind.STRING)
 
     override fun deserialize(decoder: Decoder): LocalDateTime {
         return LocalDateTime.parse(decoder.decodeString(), formatter)
     }
 }
 
+object LocaleDateSerializer : KSerializer<LocalDate> {
+    private val formatter = DateTimeFormatter.ISO_LOCAL_DATE
+
+    override fun serialize(encoder: Encoder, value: LocalDate) {
+        encoder.encodeString(value.format(formatter))
+    }
+
+    override val descriptor: SerialDescriptor
+        get() =   PrimitiveSerialDescriptor("LOCALEDATE", PrimitiveKind.STRING)
+
+    override fun deserialize(decoder: Decoder): LocalDate {
+        return LocalDate.parse(decoder.decodeString().split("T")[0], formatter)
+    }
+}
 
 
 object MoneyTypeSerializer : KSerializer<MoneyType> {

@@ -1,6 +1,7 @@
 package com.vinhnt_study.db
 
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.javatime.date
 
 import org.jetbrains.exposed.sql.javatime.datetime
 
@@ -12,7 +13,7 @@ object Moneys : Table(){
     val amount = double("amount")
     val type = integer("type")
     val description = varchar("description", 500).nullable()
-    val date = datetime("date")
+    val date = date("date")
     val createDate = datetime("create_date")
     val updateDate = datetime("update_date")
 

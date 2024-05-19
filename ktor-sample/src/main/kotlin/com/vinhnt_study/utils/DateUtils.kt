@@ -23,7 +23,7 @@ object DateUtils {
 
     fun getStartAndEndDateOfMonth(month: Int, year: Int) : Pair<Date, Date> {
         val startDate = "${year}/${month}/01".toDate(commonDateFormat)
-        val endDate = startDate.toLocalDateTime().plusMonths(1).minusDays(1).toDate()
+        val endDate = startDate.toLocalDate().plusMonths(1).minusDays(1).toDate()
         return Pair(startDate, endDate)
     }
 }

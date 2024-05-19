@@ -5,6 +5,7 @@ import com.vinhnt_study.db.DatabaseSingleton
 import com.vinhnt_study.db.Moneys
 import com.vinhnt_study.models.CategoryMoney
 import com.vinhnt_study.models.MoneyType
+import com.vinhnt_study.utils.toLocalDate
 import com.vinhnt_study.utils.toLocalDateTime
 import com.vinhnt_study.utils.toUUID
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -32,8 +33,8 @@ class ExpenseByCategoryRepositoryImpl : ExpenseByCategoryRepository {
         from: Date,
         to: Date,
     ): List<CategoryMoney> = DatabaseSingleton.dbQuery  {
-        val fromDate = from.toLocalDateTime()
-        val toDate = to.toLocalDateTime().plusDays(1)
+        val fromDate = from.toLocalDate()
+        val toDate = to.toLocalDate().plusDays(1)
         Moneys.innerJoin(Categories).slice(
            Categories.id, Categories.name, Moneys.amount.sum(),
        ).select {

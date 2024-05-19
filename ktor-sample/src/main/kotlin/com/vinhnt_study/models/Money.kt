@@ -2,6 +2,7 @@ package com.vinhnt_study.models
 
 import com.vinhnt_study.utils.*
 import kotlinx.serialization.Serializable
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.Date
 import java.util.UUID
@@ -17,8 +18,8 @@ data class Money(
     val category: Category,
     val description: String? = null,
     val source: MoneySource,
-    @Serializable(with = LocaleDateTimeSerializer::class)
-    val date: LocalDateTime? = null,
+    @Serializable(with = LocaleDateSerializer::class)
+    val date: LocalDate? = null,
      @Serializable(with = LocaleDateTimeSerializer::class)
     val createTime: LocalDateTime? = null,
      @Serializable(with = LocaleDateTimeSerializer::class)
