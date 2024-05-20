@@ -19,3 +19,8 @@ interface AuthDataService<T, R> {
     suspend fun update(t: T, accountId: String): T
     suspend fun delete(id: String, accountId: String): Boolean
 }
+
+
+interface  SearchService {
+    suspend fun  search(keyword: String?, )
+}

@@ -1,18 +1,29 @@
 package com.vinhnt_study.services
 
 import com.vinhnt_study.models.Money
+import com.vinhnt_study.models.Query
+import com.vinhnt_study.models.SortCriteria
 import com.vinhnt_study.repositories.ExpenseRepository
 import com.vinhnt_study.repositories.ExpenseRepositoryImpl
+import com.vinhnt_study.repositories.ExpenseRepositoryQuery
 import com.vinhnt_study.utils.toDate
 
 //create ExpenseService interface
+class ExpenseQuery(
+    val fromDate: String,
+    val toDate: String,
+    val categoryIds: List<String>? = null,
+    val sourceIds: List<String>? = null,
+    query: String = "",
+    page: Int = DEFAULT_PAGE,
+    pageSize: Int = DEFAULT_PAGE_SIZE,
+    sortCriteria: List<SortCriteria> = emptyList()
+) : Query(query, page, pageSize, sortCriteria)
+
 interface ExpenseService : AuthDataService<Money, String> {
     suspend fun search(
         accountId: String,
-        fromDate: String,
-        toDate: String,
-        categoryIds: List<String>? = null,
-        sourceIds: List<String>? = null
+        query: ExpenseQuery,
     ): List<Money>
 
     suspend fun getExpenseListByDate(accountId: String, date: String): List<Money>
@@ -22,9 +33,12 @@ interface ExpenseService : AuthDataService<Money, String> {
 class ExpenseServiceImpl : ExpenseService {
     private val repository: ExpenseRepository = ExpenseRepositoryImpl()
     override suspend fun search(
-        accountId: String, fromDate: String, toDate: String, categoryIds: List<String>?, sourceIds: List<String>?
+        accountId: String, query: ExpenseQuery,
     ): List<Money> {
-        return repository.search(accountId, fromDate.toDate(), toDate.toDate(), categoryIds, sourceIds)
+        return repository.search(
+            accountId,
+            ExpenseRepositoryQuery.fromQuery(query = query)
+        )
     }
 
     override suspend fun getExpenseListByDate(accountId: String, date: String): List<Money> {

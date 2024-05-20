@@ -2,6 +2,7 @@ package com.vinhnt_study.routes
 
 import com.vinhnt_study.models.Money
 import com.vinhnt_study.models.MoneyRequest
+import com.vinhnt_study.models.Query
 import com.vinhnt_study.models.ResponseData
 import com.vinhnt_study.services.*
 import com.vinhnt_study.utils.getAccountId
@@ -87,11 +88,21 @@ fun Route.expenseRoutes() {
             val toDate = call.request.queryParameters["toDate"] ?: ""
             val categoryIds = call.request.queryParameters.getAll("categoryId")
             val sourceIds = call.request.queryParameters.getAll("sourceId")
+            val pageSize = call.request.queryParameters[Query.LIMIT_KEY]  ?: ""
+            val page = call.request.queryParameters[Query.OFFSET_KEY] ?: ""
+            val query = call.request.queryParameters[Query.QUERY_KEY] ?: ""
             //call the service to search for expenses from date to date
             val expenses = expenseService.search(
                 accountId = getAccountId(call),
-                fromDate = fromDate, toDate = toDate,
-                categoryIds = categoryIds, sourceIds = sourceIds,
+                query = ExpenseQuery(
+                    fromDate = fromDate,
+                    toDate = toDate,
+                    categoryIds = categoryIds,
+                    sourceIds = sourceIds,
+                    pageSize = pageSize.toInt(),
+                    page = page.toInt(),
+                    query = query,
+                )
             )
             //return the expenses with a 200 OK status and json format
             call.respond(

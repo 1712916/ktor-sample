@@ -2,6 +2,8 @@ package com.vinhnt_study.repositories
 
 import com.vinhnt_study.db.*
 import com.vinhnt_study.models.*
+import com.vinhnt_study.models.Query
+import com.vinhnt_study.services.ExpenseQuery
 import com.vinhnt_study.utils.*
 import com.vinhnt_study.utils.toLocalDate
 import org.jetbrains.exposed.sql.*
@@ -53,14 +55,53 @@ interface MonthTotalExpenseRepository {
     ): List<QuarterMoney>
 }
 
+class ExpenseRepositoryQuery(
+    val fromDate: Date,
+    val toDate: Date,
+    val categoryIds: List<String>? = null,
+    val sourceIds: List<String>? = null,
+    val query: String = "",
+    val page: Int,
+    val pageSize: Int,
+    val sortCriteria: List<Pair<Expression<*>, SortOrder>>
+) {
+    companion object {
+        fun fromQuery(query: ExpenseQuery): ExpenseRepositoryQuery {
+            return ExpenseRepositoryQuery(
+                fromDate = query.fromDate.toDate(),
+                toDate = query.toDate.toDate(),
+                categoryIds = query.categoryIds,
+                sourceIds = query.sourceIds,
+                query = query.query,
+                page = query.page,
+                pageSize = query.pageSize,
+                sortCriteria = query.sortCriteria.map {
+                    val sortOrder = it.order.toSortOrder()
+
+                    when (it.field) {
+                        "amount" -> Moneys.amount to sortOrder
+                        "type" -> Moneys.type to sortOrder
+                        "category" -> Categories.name to sortOrder
+                        "source" -> MoneySources.name to sortOrder
+                        else -> Moneys.date to sortOrder
+                    }
+                }
+            )
+        }
+    }
+}
+
+fun String.toSortOrder(): SortOrder = when (this) {
+    "asc" -> SortOrder.ASC
+    "desc" -> SortOrder.DESC
+    else -> SortOrder.ASC
+}
+
 interface ExpenseRepository : AuthDataRepository<Money, String> {
     //search from date to date
     suspend fun search(
         accountId: String,
-        fromDate: Date,
-        toDate: Date,
-        categoryIds: List<String>? = null,
-        sourceId: List<String>? = null,
+        query: ExpenseRepositoryQuery,
     ): List<Money>
 
     suspend fun getExpenseListByDate(
@@ -93,18 +134,35 @@ class ExpenseRepositoryImpl : ExpenseRepository, TotalExpenseRepository, MonthTo
     )
 
     override suspend fun search(
-        accountId: String, fromDate: Date, toDate: Date, categoryIds: List<String>?, sourceId: List<String>?
+        accountId: String, query: ExpenseRepositoryQuery,
     ): List<Money> = DatabaseSingleton.dbQuery {
+        val categoryIds = query.categoryIds
+        val sourceId = query.sourceIds
+        val fromDate = query.fromDate
+        val toDate = query.toDate
+
         val categoryUUIDList: List<UUID>? = categoryIds?.map { it.trim().toUUID() }?.toList()
         val sourceUUIDList: List<UUID>? = sourceId?.map { it.trim().toUUID() }?.toList()
+
+        val orderBy = query.sortCriteria.toTypedArray()
+        val limit = query.pageSize
+        val offset = query.page.toLong()
+
         Moneys.innerJoin(Categories).innerJoin(MoneySources).select {
-            (Moneys.date greaterEq fromDate.toLocalDate()) and (Moneys.date lessEq toDate.toLocalDate()) and (Moneys.accountId eq accountId.toUUID())
-        }.filter {
-            //TODO("create a flag to handle condition or, and")
+            (Moneys.date greaterEq fromDate.toLocalDate()) and
+                    (Moneys.date lessEq toDate.toLocalDate()) and
+                    (Moneys.accountId eq accountId.toUUID()) and
+                    (categoryUUIDList?.let { Moneys.categoryId inList it } ?: Op.TRUE) and
+                    (sourceUUIDList?.let { Moneys.sourceId inList it } ?: Op.TRUE) and
+                    (query.query.let {
+                        if (it.isNotEmpty())
+                            (Moneys.description.like("%$it%"))
+                        else
+                            Op.TRUE
+                    })
 
-            (categoryUUIDList == null || it[Moneys.categoryId] in categoryUUIDList) || (sourceUUIDList == null || it[Moneys.sourceId] in sourceUUIDList)
         }
-
+            .limit(limit, offset)
             .map { resultRowToMoney(it) }.toList()
     }
 
@@ -162,7 +220,7 @@ class ExpenseRepositoryImpl : ExpenseRepository, TotalExpenseRepository, MonthTo
             .orderBy(
                 Moneys.date to SortOrder.DESC,
                 Moneys.amount to SortOrder.DESC,
-                )
+            )
             .map { resultRowToMoney(it) }
     }
 
