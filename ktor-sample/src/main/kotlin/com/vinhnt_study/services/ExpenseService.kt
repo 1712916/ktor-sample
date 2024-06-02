@@ -1,5 +1,6 @@
 package com.vinhnt_study.services
 
+import com.vinhnt_study.models.ListResultData
 import com.vinhnt_study.models.Money
 import com.vinhnt_study.models.Query
 import com.vinhnt_study.models.SortCriteria
@@ -24,7 +25,7 @@ interface ExpenseService : AuthDataService<Money, String> {
     suspend fun search(
         accountId: String,
         query: ExpenseQuery,
-    ): List<Money>
+    ): ListResultData<Money>
 
     suspend fun getExpenseListByDate(accountId: String, date: String): List<Money>
 }
@@ -34,7 +35,7 @@ class ExpenseServiceImpl : ExpenseService {
     private val repository: ExpenseRepository = ExpenseRepositoryImpl()
     override suspend fun search(
         accountId: String, query: ExpenseQuery,
-    ): List<Money> {
+    ): ListResultData<Money> {
         return repository.search(
             accountId,
             ExpenseRepositoryQuery.fromQuery(query = query)

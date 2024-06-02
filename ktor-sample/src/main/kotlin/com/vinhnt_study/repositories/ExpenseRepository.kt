@@ -56,8 +56,8 @@ interface MonthTotalExpenseRepository {
 }
 
 class ExpenseRepositoryQuery(
-    val fromDate: Date,
-    val toDate: Date,
+    val fromDate: Date?,
+    val toDate: Date?,
     val categoryIds: List<String>? = null,
     val sourceIds: List<String>? = null,
     val query: String = "",
@@ -67,9 +67,17 @@ class ExpenseRepositoryQuery(
 ) {
     companion object {
         fun fromQuery(query: ExpenseQuery): ExpenseRepositoryQuery {
+            var fromDate: Date? = null
+            var toDate: Date? = null
+            try {
+                fromDate = query.fromDate.toDate()
+                toDate = query.toDate.toDate()
+            } catch (e: Exception) {
+
+            }
             return ExpenseRepositoryQuery(
-                fromDate = query.fromDate.toDate(),
-                toDate = query.toDate.toDate(),
+                fromDate = fromDate,
+                toDate = toDate,
                 categoryIds = query.categoryIds,
                 sourceIds = query.sourceIds,
                 query = query.query,
@@ -102,7 +110,7 @@ interface ExpenseRepository : AuthDataRepository<Money, String> {
     suspend fun search(
         accountId: String,
         query: ExpenseRepositoryQuery,
-    ): List<Money>
+    ): ListResultData<Money>
 
     suspend fun getExpenseListByDate(
         accountId: String,
@@ -135,7 +143,7 @@ class ExpenseRepositoryImpl : ExpenseRepository, TotalExpenseRepository, MonthTo
 
     override suspend fun search(
         accountId: String, query: ExpenseRepositoryQuery,
-    ): List<Money> = DatabaseSingleton.dbQuery {
+    ): ListResultData<Money> = DatabaseSingleton.dbQuery {
         val categoryIds = query.categoryIds
         val sourceId = query.sourceIds
         val fromDate = query.fromDate
@@ -146,24 +154,38 @@ class ExpenseRepositoryImpl : ExpenseRepository, TotalExpenseRepository, MonthTo
 
         val orderBy = query.sortCriteria.toTypedArray()
         val limit = query.pageSize
-        val offset = query.page.toLong()
+        val page = query.page.toLong()
+        val offset : Long = (page * limit)
 
-        Moneys.innerJoin(Categories).innerJoin(MoneySources).select {
-            (Moneys.date greaterEq fromDate.toLocalDate()) and
-                    (Moneys.date lessEq toDate.toLocalDate()) and
-                    (Moneys.accountId eq accountId.toUUID()) and
-                    (categoryUUIDList?.let { Moneys.categoryId inList it } ?: Op.TRUE) and
-                    (sourceUUIDList?.let { Moneys.sourceId inList it } ?: Op.TRUE) and
-                    (query.query.let {
-                        if (it.isNotEmpty())
-                            (Moneys.description.like("%$it%"))
-                        else
-                            Op.TRUE
-                    })
+// Build the base query with conditions
+        val baseQuery = Moneys
+            .innerJoin(Categories)
+            .innerJoin(MoneySources)
+            .select {
+                (query.fromDate?.let { Moneys.date greaterEq it.toLocalDate() } ?: Op.TRUE) and
+                        (query.toDate?.let { Moneys.date lessEq it.toLocalDate() } ?: Op.TRUE) and
+                        (Moneys.accountId eq accountId.toUUID()) and
+                        (categoryUUIDList?.let { Moneys.categoryId inList it } ?: Op.TRUE) and
+                        (sourceUUIDList?.let { Moneys.sourceId inList it } ?: Op.TRUE) and
+                        (if (query.query.isNotEmpty()) Moneys.description like "%${query.query}%" else Op.TRUE)
+            }
 
-        }
+        // Get the total count of items that match the base query
+        val totalCount = baseQuery.count()
+
+        // Fetch the paginated results
+        val resultList = baseQuery
+            .orderBy(*if (orderBy.isNotEmpty()) orderBy else arrayOf(Moneys.date to SortOrder.DESC))
             .limit(limit, offset)
-            .map { resultRowToMoney(it) }.toList()
+            .map { resultRowToMoney(it) }
+            .toList()
+        // Return the result
+        ListResultData(
+            list = resultList,
+            total = totalCount,
+            page = page,
+            pageSize = limit
+        )
     }
 
     override suspend fun getExpenseListByDate(accountId: String, date: Date): List<Money> = DatabaseSingleton.dbQuery {

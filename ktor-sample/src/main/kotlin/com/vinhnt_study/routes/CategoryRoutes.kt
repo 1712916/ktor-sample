@@ -7,6 +7,7 @@ import com.vinhnt_study.services.CategoryCountServiceImpl
 import com.vinhnt_study.services.CategoryService
 import com.vinhnt_study.services.CategoryServiceImpl
 import com.vinhnt_study.utils.getAccountId
+import com.vinhnt_study.utils.toDate
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.request.*
@@ -61,7 +62,10 @@ fun Route.categoryCountRoutes() {
     authenticate("auth-jwt") {
 
         get("api/categories-count") {
-            call.respond(ResponseData.success(categoryService.countAll(getAccountId(call))))
+            val fromDate = call.request.queryParameters["fromDate"] ?: ""
+            val toDate = call.request.queryParameters["toDate"] ?: ""
+
+            call.respond(ResponseData.success(categoryService.countAll(getAccountId(call), fromDate.toDate(), toDate.toDate())))
         }
 
         get("api/categories-count/{id}") {

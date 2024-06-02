@@ -295,6 +295,24 @@ fun Route.totalExpenseByCategoryRoutes() {
                 ResponseData.success(expenses)
             )
         }
+
+        get("api/expenses/category/total/ids") {
+            val fromDate = call.request.queryParameters["fromDate"] ?: ""
+            val toDate = call.request.queryParameters["toDate"] ?: ""
+            val ids = call.request.queryParameters.getAll("id")?.filter { it.trim().isNotEmpty() } ?: emptyList()
+
+            //call the service to search for expenses from date to date
+            val expenses = expenseService.getListTotalExpenseByCategoryIds(
+                accountId = getAccountId(call),
+                idList = ids,
+                from = fromDate.toDate(),
+                to = toDate.toDate(),
+            )
+            //return the expenses with a 200 OK status and json format
+            call.respond(
+                ResponseData.success(expenses)
+            )
+        }
     }
 }
 

@@ -12,6 +12,13 @@ interface TotalExpenseCategoryService {
         from: Date,
         to: Date,
     ): List<CategoryMoney>
+
+    suspend fun getListTotalExpenseByCategoryIds(
+        accountId: String,
+        idList: List<String>,
+        from: Date,
+        to: Date,
+    ): List<CategoryMoney>
 }
 
 class TotalExpenseCategoryServiceImpl : TotalExpenseCategoryService {
@@ -19,6 +26,15 @@ class TotalExpenseCategoryServiceImpl : TotalExpenseCategoryService {
 
     override suspend fun getListTotalExpenseByCategory(accountId: String, from: Date, to: Date): List<CategoryMoney> {
         return  expenseByCategoryRepository.getListTotalExpenseByCategory(accountId, from, to)
+    }
+
+    override suspend fun getListTotalExpenseByCategoryIds(
+        accountId: String,
+        idList: List<String>,
+        from: Date,
+        to: Date
+    ): List<CategoryMoney> {
+        return  expenseByCategoryRepository.getListTotalExpenseByCategoryIds(accountId, idList, from, to)
     }
 
 }
