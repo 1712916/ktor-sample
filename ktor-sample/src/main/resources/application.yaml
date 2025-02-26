@@ -8,7 +8,7 @@ ktor:
     modules:
       - com.vinhnt_study.ApplicationKt.module
   database:
-    url: "jdbc:postgresql://localhost:32768/tracking_money_prod"
+    url: "jdbc:postgresql://localhost:32769/tracking_money_prod"
     user: "postgres"
     password: "postgrespw"
     dev:
